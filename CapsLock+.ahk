@@ -5,10 +5,10 @@
 }
 
 
-IfExist, capslock+icon.ico
+IfExist, Retro_Mario.ico
 {
 ;freezing icon
-menu, TRAY, Icon, capslock+icon.ico, , 1
+menu, TRAY, Icon, Retro_Mario.ico, , 1
 }
 Menu, Tray, Icon,,, 1
 
@@ -16,7 +16,7 @@ Menu, Tray, Icon,,, 1
 
 global CLversion:="Version: 2.7.0.0 | 2016-11-30`n`nCopyright 2016 Chen JunKai" 
 
-global cClipboardAll ;capslock+ clipboard
+;global cClipboardAll ;capslock+ clipboard
 global caClipboardAll ;capslock+alt clipboard
 global sClipboardAll ;system clipboard
 global whichClipboardNow  ;0 system clipboard; 1 capslock+ clipboard; 2 capslock+alt clipboard
@@ -82,9 +82,10 @@ KeyWait, Capslock
 CapsLock:="" ;Capslock最优先置空，来关闭 Capslock+ 功能的触发
 if CapsLock2
 {
-    SetCapsLockState, % GetKeyState("CapsLock","T") ? "Off" : "On"
+;    SetCapsLockState, % GetKeyState("CapsLock","T") ? "Off" : "On"
+Send #{Space}
 }
-CapsLock2:=""
+CapsLock2:=""	
 
 ;
 if(winTapedX!=-1)

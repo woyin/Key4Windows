@@ -236,27 +236,6 @@ foolGui(switch=1){
 
 clipSaver(clipX)
 {
-    global
-    if(WinActive("ahk_exe EXCEL.EXE"))
-    {
-        foolgui()
-        if(clipX="s")
-            sClipboardAll:=ClipboardAll
-        else if(clipX="c")
-            cClipboardAll:=ClipboardAll
-        else ; if(clipX="ca")
-            caClipboardAll:=ClipboardAll
-        foolgui(0)
-    }
-    else
-    {
-        if(clipX="s")
-            sClipboardAll:=ClipboardAll
-        else if(clipX="c")
-            cClipboardAll:=ClipboardAll
-        else ; if(clipX="ca")
-            caClipboardAll:=ClipboardAll
-    }
 }
 
 ;字符串中的特殊字符转义
