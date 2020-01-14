@@ -36,8 +36,8 @@ gosub, jsEval_init
 setTimer, youdaoApiInit, -1 ;初始化翻译api
 gosub, getDefaultBrowser
 
-global needInitQ:=1 ;+q初始化标志位
-CLq() ;初始化+q
+;global needInitQ:=1 ;+q初始化标志位
+;CLq() ;初始化+q
 
 setTimer, mouseSpeedInit, -1
 Suspend, Off

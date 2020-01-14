@@ -461,7 +461,7 @@ keyFunc_qbar(){
     ;先关闭所有Caps热键，然后再打开
     ;防止其他功能在 qbar 出来这段时间因为输入文字而被触发
     CapsLock:=CapsLock2:=""
-    CLq()
+    ;CLq()
     CapsLock:=1
     return
 
@@ -528,12 +528,22 @@ keyFunc_selectHome(){
     return
 }
 
+;; 
+keyFunc_moveHome(){
+    SendInput, {Home}
+    return
+}
+
 
 keyFunc_selectEnd(){
     SendInput, +{End}
     return
 }
 
+keyFunc_moveEnd(){
+    SendInput, {End}
+    return
+}
 
 keyFunc_selectWordLeft(){
     SendInput, +^{Left}

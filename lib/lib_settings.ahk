@@ -117,17 +117,17 @@ if(latestModifyTime!=settingsModifyTime)
     if(isChangeQStyle)
     {
         global needInitQ:=1 ;+q初始化标志位
-        CLq()
+        ;CLq()
         return ;如果整个Q都重绘，那也不用在单独重载QListView了，返回好了
     }
     if(isChangeQSearch)
     {
-        SetTimer, QListIconInit, -1
+        ;SetTimer, QListIconInit, -1
     }
     if(isChangeQWeb||isChangeQRun)
     {
-        SetTimer, QListIconInit, -1
-        SetTimer, hotStringInit, -1
+        ;SetTimer, QListIconInit, -1
+        ;SetTimer, hotStringInit, -1
     }
 }
 return
