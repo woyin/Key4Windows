@@ -30,22 +30,23 @@ gosub, language_Simplified_Chinese
 gosub, settingsInit ;初始化设置
 
 
-gosub, bindWinsInit
+;gosub, bindWinsInit
 
-gosub, jsEval_init
-setTimer, youdaoApiInit, -1 ;初始化翻译api
-gosub, getDefaultBrowser
+;gosub, jsEval_init
+;setTimer, youdaoApiInit, -1 ;初始化翻译api
+;gosub, getDefaultBrowser
 
 ;global needInitQ:=1 ;+q初始化标志位
 ;CLq() ;初始化+q
 
-setTimer, mouseSpeedInit, -1
+;setTimer, mouseSpeedInit, -1
 Suspend, Off
 
 if(loadingAnimation != "0")
 	gosub, hideLoading
 
 return
+/*
 
 getDefaultBrowser:
 global defaultBrowser
@@ -57,3 +58,5 @@ RegExMatch(defaultBrowser, "[a-zA-Z]:\\[\s\S]*\.exe", defaultBrowser)
 if(defaultBrowser="")
 	defaultBrowser:="C:\Program Files (x86)\Internet Explorer\IExplore.exe"
 return
+
+*/

@@ -12,25 +12,47 @@ menu, TRAY, Icon, Retro_Mario.ico, , 1
 }
 Menu, Tray, Icon,,, 1
 
-
-
 global CLversion:="Copyright by Woyin" 
+
+;global cClipboardAll ;capslock+ clipboard
+;global caClipboardAll ;capslock+alt clipboard
+;global sClipboardAll ;system clipboard
+;global clipSaveArr=[]
+;allowRunOnClipboardChange:=true
+
 
 #Include lib
 #Include lib_init.ahk ;The beginning of all things
-#include lib_keysFunction.ahk
-#include lib_keysSet.ahk
-#include lib_settings.ahk ;get the settings from capslock+settings.ini 
-#Include lib_functions.ahk ;public functions
-#include lib_loadAnimation.ahk
 
 ; language
 #include ..\language\lang_func.ahk
 #include ..\language\Simplified_Chinese.ahk
+;  #include ..\language\Traditional_Chinese.ahk
+;  #include ..\language\English.ahk
+; /language
+
+#include lib_keysFunction.ahk
+#include lib_keysSet.ahk
+#include lib_otherkeyremapping.ahk
+;  #include lib_ahkExec.ahk
+;  #include lib_scriptDemo.ahk
+;  #include lib_fileMethods.ahk
+
+#include lib_settings.ahk ;get the settings from capslock+settings.ini 
+;#Include lib_clQ.ahk ;capslock+Q
+;#Include lib_ydTrans.ahk  ;capslock+T translate
+#Include lib_clTab.ahk 
+#Include lib_functions.ahk ;public functions
+;#Include lib_bindWins.ahk ;capslock+` 1~8, windows bind
+;#Include lib_winJump.ahk
+;#Include lib_winTransparent.ahk
+;#Include lib_mouseSpeed.ahk
+;#Include lib_mathBoard.ahk
+#include lib_loadAnimation.ahk
 
 ;change dir
-;#include ..\userAHK
-;#include *i main.ahk
+#include ..\userAHK
+#include *i main.ahk
 
 #MaxHotkeysPerInterval 500
 #NoEnv
@@ -49,28 +71,30 @@ start:
 ;-----------------START-----------------
 global CapsLockToChangeInputMethod, CapsLockStatus
 
-Capslock::
+CapsLock::
 CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
 CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关
 
+; 确认到底是单次点击，还是与其他按键组成组合按键
 SetTimer, setCapsLockToChangeInputMethod, -200 ; 200ms 犹豫操作时间
-settimer, changeMouseSpeed, 50 ;暂时修改鼠标速度
+setTimer, changeMouseSpeed, 50 ;暂时修改鼠标速度
 
 KeyWait, Capslock
 ;CapsLock:=0 ;Capslock最优先置空，来关闭 Capslock+ 功能的触发
 if CapsLockToChangeInputMethod
 {
-;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
-Send ^{Space}
-CapsLockToChangeInputMethod:=0
+;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行
+; 改变输入法
+    Send #{Space}
+    CapsLockToChangeInputMethod:=0
 }
 CapsLockStatus:=0
 
 return
 
-; 改变输入法状态的开关
+; 通过定义函数setCapsLockToChangeInputMethod 改变输入法状态的开关
 setCapsLockToChangeInputMethod:
-CapsLockToChangeInputMethod:=0
+    CapsLockToChangeInputMethod:=0
 return
 
 

@@ -9,8 +9,8 @@
 4. 按下 capslock+F7 试试
 ************************************************/
 
-
-keyfunc_test2(str){
-  msgbox, % str
-  return
-}
+/**
+针对Anne Pro 2做优化
+将Shift+ESC映射为~
+*/
++ESC::~
