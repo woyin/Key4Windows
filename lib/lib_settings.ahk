@@ -100,18 +100,14 @@ if(latestModifyTime!=settingsModifyTime)
             {
                 if(key2="autostart")
                     SetTimer, globalSettings, -1
-                else if(key2="loadScript")
-                    SetTimer, jsEval_init, -1
+               ; else if(key2="loadScript")
+                ;    SetTimer, jsEval_init, -1
             }
         }
     }
     if(isChangeTabHotString)
     {
         SetTimer, hotStringInit, -1
-    }
-    if(isChangeTTranslate)
-    {
-        SetTimer, youdaoApiInit, -1
     }
     ;如果有新添加的字段，要在这句上面添加一个if，这样文件改动才会修改到相应的内容
     if(isChangeQStyle)

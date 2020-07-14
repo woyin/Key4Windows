@@ -54,14 +54,13 @@ CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
 CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关
 
 SetTimer, setCapsLockToChangeInputMethod, -200 ; 200ms 犹豫操作时间
-settimer, changeMouseSpeed, 50 ;暂时修改鼠标速度
 
 KeyWait, Capslock
 ;CapsLock:=0 ;Capslock最优先置空，来关闭 Capslock+ 功能的触发
 if CapsLockToChangeInputMethod
 {
 ;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
-Send ^{Space}
+Send #{Space}
 CapsLockToChangeInputMethod:=0
 }
 CapsLockStatus:=0

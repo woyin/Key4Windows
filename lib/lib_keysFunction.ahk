@@ -111,28 +111,6 @@ keyFunc_delete(){
 }
 
 
-keyFunc_translate(){
-    global
-    selText:=getSelText()
-    if(selText)
-    { 
-        ydTranslate(selText)
-    }
-    else
-    { 
-        ClipboardOld:=ClipboardAll
-        Clipboard:=""
-        SendInput, ^{Left}^+{Right}^{insert}
-        ClipWait, 0.05
-        selText:=Clipboard
-        ydTranslate(selText)
-        Clipboard:=ClipboardOld
-    }
-    SetTimer, setTransGuiActive, -400
-    Return
-}
-
-
 keyFunc_end(){
     SendInput,{End}
     Return
@@ -568,37 +546,6 @@ keyFunc_pageMoveLineDown(i:=1){
     return
 }
 
-
-
-keyFunc_getJSEvalString(){
-    global
-    ClipboardOld:=ClipboardAll
-    Clipboard:=""
-    SendInput, ^{insert} ;
-    ClipWait, 0.1
-    if(!ErrorLevel)
-    {
-        result:=escapeString(Clipboard)
-        inputbox, result,,%lang_kf_getDebugText%,,,,,,,, % result
-        if(!ErrorLevel)
-        {
-            Clipboard:=result
-    
-            return
-        }
-    }
-    Sleep, 200
-    Clipboard:=ClipboardOld
-    return
-}
-
-
-keyFunc_tabScript(){
-    tabAction()
-    Return
-}
-
-
 keyFunc_openCpasDocs(){
     Run, http://cjkis.me/capslock+
     return
@@ -703,23 +650,6 @@ keyFunc_qbar_lowerFolderPath(){
     return true
 }
 
-;winbind-------------
-keyFunc_winbind_activate(n){
-    global
-    activateWinAction(n)
-    return
-}
-
-
-keyFunc_winbind_binding(n){
-    global
-    if(tapTimes[n]=="")
-        initWinsInfos(n)
-    tapTimes(n)
-    return
-}
-
-
 keyFunc_winPin(){
     _id:=WinExist("A")
     ;  WinGet, ExStyle, ExStyle
@@ -740,40 +670,4 @@ keyFunc_goCjkPage(){
     global
     run, http://cjkis.me
     return
-}
-
- 
-;keys functions end-------------
-; testing arer ---
-
-keyFunc_activateSideWin(UDLR){
-    activateSideWin(UDLR)
-}
-
-keyFunc_putWinToBottom(){
-    putWinToBottom()
-}
-
-keyFunc_winJumpIgnore(){
-    winJumpIgnore()
-}
-
-keyFunc_clearWinMinimizeStach(){
-    clearWinMinimizeStach()
-}
-
-keyFunc_popWinMinimizeStack(){
-    popWinMinimizeStack()
-}
-
-keyFunc_pushWinMinimizeStack(){
-    pushWinMinimizeStack()
-}
-
-keyFunc_unshiftWinMinimizeStack(){
-    unshiftWinMinimizeStack()
-}
-
-keyFunc_winTransparent(){
-    winTransparent()
 }
