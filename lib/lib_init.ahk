@@ -6,8 +6,8 @@ return
 initAll:
 Suspend, On ;挂起所有热键
 
-IniRead, loadingAnimation, CapsLock+settings.ini, Global, loadingAnimation, 1
-IniRead, language, CapsLock+settings.ini, Global, language, 0
+IniRead, loadingAnimation, settings.ini, Global, loadingAnimation, 1
+IniRead, language, settings.ini, Global, language, 0
 
 if(loadingAnimation != "0")
 	gosub, showLoading
@@ -29,34 +29,8 @@ gosub, language_Simplified_Chinese
 
 gosub, settingsInit ;初始化设置
 
-
-;gosub, bindWinsInit
-
-;gosub, jsEval_init
-;setTimer, youdaoApiInit, -1 ;初始化翻译api
-;gosub, getDefaultBrowser
-
-;global needInitQ:=1 ;+q初始化标志位
-;CLq() ;初始化+q
-
-;setTimer, mouseSpeedInit, -1
 Suspend, Off
 
 if(loadingAnimation != "0")
 	gosub, hideLoading
-
 return
-/*
-
-getDefaultBrowser:
-global defaultBrowser
-;获取默认浏览器图标，QWeb的listview用
-RegRead, defaultBrowser, HKCU, SOFTWARE\Microsoft\Windows\Shell\Associations\UrlAssociations\http\UserChoice, ProgId
-RegRead, defaultBrowser, HKLM, SOFTWARE\Classes\%defaultBrowser%\shell\open\command
-RegExMatch(defaultBrowser, "[a-zA-Z]:\\[\s\S]*\.exe", defaultBrowser)
-;~ MsgBox, % defaultBrowser
-if(defaultBrowser="")
-	defaultBrowser:="C:\Program Files (x86)\Internet Explorer\IExplore.exe"
-return
-
-*/

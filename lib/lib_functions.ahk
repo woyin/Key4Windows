@@ -130,7 +130,7 @@ fixDpi(num)
 ;保存设置到settings.ini
 setSettings(sec,key,val)
 {
-    IniWrite, % val, CapsLock+settings.ini, %sec%, % key
+    IniWrite, % val, settings.ini, %sec%, % key
 }
 
 ;显示一个信息

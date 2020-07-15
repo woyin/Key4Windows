@@ -2,16 +2,6 @@
 提出字符串放在这里(还有很多还嵌在代码中= =)
 */
 language_Simplified_Chinese:
-; lib\lib_bindWins.ahk
-global lang_bw_noWIRini:="CapsLock+winsInfosRecorder.ini 不存在"
-
-; clq.ahk
-global lang_clq_addIni:="确定将以下字符串简写成 {replace0}，并记录到 {replace1}？"
-global lang_clq_existing:="{replace0}`n已存在于 {replace1}，确定用以下设置覆盖？"
-global lang_clq_qrunFileNotExist:="QRun中存在以下记录，而对应文件（文件夹）不存在，是否删除该设置？"
-global lang_clq_noCmd:="没有该命令"
-
-
 ; ydTrans.ahk
 global lang_yd_translating:="翻译中...  （如果网络太差，翻译请求会暂时阻塞程序，稍等就好）"
 global lang_yd_name:="有道翻译"
@@ -34,7 +24,7 @@ global lang_settingsUserInit:=""
 lang_settingsUserInit=
 (
 ;------------ Encoding: UTF-16 ------------
-;请对照 CapsLock+settingsDemo.ini 来配置相关设置
+;请对照 settingsDemo.ini 来配置相关设置
 [Global]
 
 loadScript=scriptDemo.js
@@ -61,8 +51,8 @@ lang_settingsIniInit=
 ; #CapsLock+ 设置样本
 ; - ******请务必阅读以下说明：******
 
-; - **这里的设置是只读的，仅作说明参考，不要修改这里的设置（修改了也无效），需要自定义设置请在 CapsLock+settings.ini 中的对应段名中作添加修改
-;     例如，需要开启开机自启动，请在 CapsLock+settings.ini 的 [Global] 下添加：autostart=1，并保存
+; - **这里的设置是只读的，仅作说明参考，不要修改这里的设置（修改了也无效），需要自定义设置请在 settings.ini 中的对应段名中作添加修改
+;     例如，需要开启开机自启动，请在 settings.ini 的 [Global] 下添加：autostart=1，并保存
 
 ; - "[]"里面是段名，不能修改
 ; - 各段下所有设置的格式都为：键名=键值，每行一个
