@@ -5,8 +5,8 @@
 
 ## 1.怎么运行Capslock+的源码？
 1. 下载 [AutoHotkey](http://www.ahkscript.org/)，并安装。
-2. 从 GitHub 下载 Capslock+ 源码。
-3. 运行`Capslock+.ahk`。
+2. 从 GitHub 下载源码。
+3. 运行`LinuxKey.ahk`。
 
 ## 2.能不能在XXX快捷键上实现XXX功能？
 
@@ -14,7 +14,7 @@
 /*
 不打算修改程序本身，只想为某个按键实现功能的话，可以在这里：
 1. 在lib/lib_keysFunction.ahk 添加 keyfunc_xxxx() 的函数，
-2. 在 Capslock+settings.ini [keys]下添加设置，
+2. 在 settings.ini [keys]下添加设置，
 例如按下面这样写，然后添加设置：caps_f7=keyFunc_test2(apple)
 3. 保存，重载 capslock+ (capslock+F5)
 4. 按下 capslock+F7 试试
@@ -30,7 +30,7 @@ keyfunc_test2(str){
 具体要实现什么功能，就去学下 AutoHotkey 咯，很快上手的。
 
 ## 3.那你原有的功能我想改怎么改？
-`Capslock+.ahk`是入口文件，其他所有依赖文件都扔`/lib`里了，各文件说明如下：
+`LinuxKey.ahk`是入口文件，其他所有依赖文件都扔`/lib`里了，各文件说明如下：
 
 |文件|说明|
 |:---|:---|
