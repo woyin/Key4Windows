@@ -343,3 +343,9 @@ SystemCursor(OnOff:=1)   ; 初始化 = "I","Init"; 隐藏 = 0,"Off"; 切换 = -1
         DllCall( "SetSystemCursor", "Ptr",h_cursor, "UInt",c%A_Index% )
     }
 }
+
+; 将全局capsLockStatus 置为0
+setCapsLockToChangeInputMethod(){
+    ; global CapsLockStatus
+    CapsLockToChangeInputMethod = 0
+}

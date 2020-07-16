@@ -6,11 +6,6 @@ keyFunc_doNothing(){
     return
 }
 
-keyFunc_test(){
-    MsgBox, , , testing, 0.3
-    return
-}
-
 keyFunc_send(p){
     sendinput, % p
     return
@@ -170,12 +165,6 @@ keyFunc_sendChar(char){
     SendInput, +{insert}
     Sleep, 50
     Clipboard:=ClipboardOld
-    return
-}
-
-keyFunc_doubleAngle(){
-    if(!keyFunc_qbar_upperFolderPath())
-        keyFunc_doubleChar("<",">")
     return
 }
 
@@ -432,27 +421,6 @@ keyFunc_paste_2(){
     Return
 }
 
-
-keyFunc_qbar(){
-    global
-    SetTimer, setCLqActive, 50
-    ;先关闭所有Caps热键，然后再打开
-    ;防止其他功能在 qbar 出来这段时间因为输入文字而被触发
-    CapsLock:=CapsLock2:=""
-    ;CLq()
-    CapsLock:=1
-    return
-
-    setCLqActive:
-    IfWinExist, ahk_id %GuiHwnd%
-    {
-        SetTimer, ,Off
-        WinActivate, ahk_id %GuiHwnd%
-    }
-    return
-}
-
-
 keyFunc_tabPrve(){
     SendInput, ^+{tab}
     return
@@ -546,12 +514,6 @@ keyFunc_pageMoveLineDown(i:=1){
     return
 }
 
-keyFunc_openCpasDocs(){
-    Run, http://cjkis.me/capslock+
-    return
-}
-
-
 keyFunc_mediaPrev(){
     SendInput, {Media_Prev}
     return
@@ -591,83 +553,5 @@ keyFunc_volumeMute(){
 keyFunc_reload(){
     MsgBox, , , reload, 0.5
     Reload
-    return
-}
-
-keyFunc_send_dot(){
-    if(!keyFunc_qbar_lowerFolderPath())
-        SendInput, {U+002e}
-    return
-}
-
-;qbar中跳到上层文件路径
-keyFunc_qbar_upperFolderPath(){
-    global
-    if(!WinActive("ahk_id" . GuiHwnd))
-    {
-        return
-    }
-    if(LVlistsType=0)
-    {
-
-        return true
-    }
-    ControlGetText, editText, , ahk_id %editHwnd%
-    ;  if(historyIndex>1)
-    ;      historyIndex--
-
-    ;  _t:=qbarPathHistory[historyIndex+1]
-    ;  if(_t=editText)
-    ;  {
-    ;      editText:=qbarPathHistory[historyIndex]
-    ;  }
-    ;  else
-    ;      editText:=_t
-    qbarPathFuture.insert(editText)    ;记录路径历史
-    editText := RegExReplace(editText,"i)([^\\]*\\|[^\\]*)$")
-    ;  ifInsertHistory:=0  ;禁止记录地址
-    ifClearFuture:=0
-    ControlSetText, , %editText%, ahk_id %editHwnd%
-    sendinput, {end}
-    return true
-}
-
-;qbar中跳到下层文件路径
-keyFunc_qbar_lowerFolderPath(){
-    global
-    if(!WinActive("ahk_id" . GuiHwnd))
-    {
-        return
-    }
-    ;  ifInsertHistory:=0  ;禁止记录地址
-    editText:=qbarPathFuture.remove()
-    if(editText)
-    {
-        ifClearFuture:=0
-        ControlSetText, , %editText%, ahk_id %editHwnd%
-        sendinput, {end}
-    }
-    return true
-}
-
-keyFunc_winPin(){
-    _id:=WinExist("A")
-    ;  WinGet, ExStyle, ExStyle
-    ;  if (ExStyle & 0x8)
-    ;  {
-    ;      WinSet, AlwaysOnTop, Off
-    ;      WinSet, Transparent, Off
-    ;    
-    ;      return
-    ;  }
-    WinSet, AlwaysOnTop
-    ;  WinSet, Transparent, 210
-    return
-}
-
-
-keyFunc_goCjkPage(){
-    global
-    run, http://cjkis.me
     return
 }

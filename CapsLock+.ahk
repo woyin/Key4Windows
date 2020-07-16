@@ -1,7 +1,8 @@
-﻿if not A_IsAdmin ;running by administrator
+﻿#SingleInstance force
+if not A_IsAdmin ;running by administrator
 {
    Run *RunAs "%A_ScriptFullPath%" 
-   ExitApp
+   ExitApp 0
 }
 
 
@@ -49,27 +50,25 @@ start:
 ;-----------------START-----------------
 global CapsLockToChangeInputMethod, CapsLockStatus
 
-Capslock::
+CapsLock::
 CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
-CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关
+CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关 
+SetTimer, noNeedToChangeInputMethod, -200 ; 200ms 犹豫操作时间,
 
-SetTimer, setCapsLockToChangeInputMethod, -200 ; 200ms 犹豫操作时间
-
-KeyWait, Capslock
+KeyWait, CapsLock
 ;CapsLock:=0 ;Capslock最优先置空，来关闭 Capslock+ 功能的触发
 if CapsLockToChangeInputMethod
 {
 ;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
-Send #{Space}
-CapsLockToChangeInputMethod:=0
+    Send #{Space}
+    setCapsLockToChangeInputMethod()
 }
 CapsLockStatus:=0
-
 return
 
 ; 改变输入法状态的开关
-setCapsLockToChangeInputMethod:
-CapsLockToChangeInputMethod:=0
+noNeedToChangeInputMethod:
+    setCapsLockToChangeInputMethod()
 return
 
 
@@ -77,6 +76,10 @@ return
 
 ;----------------------------keys-set-start-----------------------------
 ; 特殊在这个#If，表示后面的表达式如果成为true的时候，我们按下去的按键（大概是吧）将成为一个修饰按键，配合下面的其他键，组成了组合键
+; 此处逻辑绕了一下。
+; 先是通过lib/lib_keysSet.ahk 中的默认定义，为每个配合了CapsLock的组合键做一个默认值
+; 然后又通过lib/lib_settings.ahk 中的方法，通过读取settings.ini 文件中[Keys] 段的值进行覆盖（用户自定义的覆盖）
+; 这种做法本质上是以lib_keySet 作为系统默认配置（不需要修改），然后利用setting.ini 文件作为用户配置文件进行修改
 #If CapsLockStatus ;when capslock key press and hold
 
 

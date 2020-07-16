@@ -115,7 +115,7 @@ if(!keyset.caps_ralt)
     keyset.caps_ralt:="keyFunc_doNothing"
 
 if(!keyset.caps_f1)
-    keyset.caps_f1:="keyFunc_openCpasDocs"
+    keyset.caps_f1:="keyFunc_doNothing"
 if(!keyset.caps_f2)
     keyset.caps_f2:="keyFunc_mathBoard"
 if(!keyset.caps_f3)
@@ -125,7 +125,7 @@ if(!keyset.caps_f4)
 if(!keyset.caps_f5)
     keyset.caps_f5:="keyFunc_reload"
 if(!keyset.caps_f6)
-    keyset.caps_f6:="keyFunc_winPin"
+    keyset.caps_f6:="keyFunc_doNothing"
 if(!keyset.caps_f7)
     keyset.caps_f7:="keyFunc_doNothing"
 if(!keyset.caps_f8)
