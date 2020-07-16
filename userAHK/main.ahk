@@ -1,16 +1,14 @@
-#include demo.ahk
+#SingleInstance, Force
+SendMode Input
+SetWorkingDir, %A_ScriptDir%
 
-/*
-不打算修改程序本身，只想为某个按键实现功能的话，可以在这里：
-1. 添加 keyfunc_xxxx() 的函数，
-2. 在 Capslock+settings.ini [keys]下添加设置，
-例如按下面这样写，然后添加设置：caps_f7=keyFunc_test2(apple)
-3. 保存，重载 capslock+ (capslock+F5)
-4. 按下 capslock+F7 试试
-************************************************/
-
-/**
-针对Anne Pro 2做优化
-将Shift+ESC映射为~
-*/
-+ESC::~
+; Make Some other key-remapping without CapsLock
++ESC::~ ; Mapping for 60% keyboard, for example Anne Pro 2
+; 黏贴
++Backspace::
+    send +{Insert}
+    return
+; 复制
+^BackSpace::
+    send ^{Insert}
+    return

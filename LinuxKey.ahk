@@ -13,21 +13,21 @@ menu, TRAY, Icon, Retro_Mario.ico, , 1
 }
 Menu, Tray, Icon,,, 1
 
-
-
 global CLversion:="Copyright by Woyin" 
 
-#Include lib
-#Include lib_init.ahk ;The beginning of all things
-#include lib_keysFunction.ahk
-#include lib_keysSet.ahk
-#include lib_settings.ahk ;get the settings from capslock+settings.ini 
-#Include lib_functions.ahk ;public functions
-#include lib_loadAnimation.ahk
+;The beginning of all things
+#Include %A_ScriptDir%\lib\lib_init.ahk 
+#include %A_ScriptDir%\lib\lib_keysFunction.ahk
+#include %A_ScriptDir%\lib\lib_keysSet.ahk
+;get the settings from capslock+settings.ini 
+#include %A_ScriptDir%\lib\lib_settings.ahk 
+;public functions
+#Include %A_ScriptDir%\lib\lib_functions.ahk 
+#include %A_ScriptDir%\lib\lib_loadAnimation.ahk
 
 ; language
-#include ..\language\lang_func.ahk
-#include ..\language\Simplified_Chinese.ahk
+#include %A_ScriptDir%\language\lang_func.ahk
+#include %A_ScriptDir%\language\Simplified_Chinese.ahk
 
 ;change dir
 ;#include ..\userAHK
@@ -40,6 +40,8 @@ Process Priority,,High
 
 
 start:
+; Make some other Things
+#Include %A_ScriptDir%\userAHK\main.ahk
 ;-------程序解释------------------------
 ; 该程序的逻辑与Mac上面的改变按键的逻辑不同
 ; Autohotkey 无法真正意义上实现Capslock的组合键，所以用了两个变量来间接判断Capslock按键到底是被触发了一次，还是按住后与其他组合键一起使用
