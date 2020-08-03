@@ -55,7 +55,7 @@ global CapsLockToChangeInputMethod, CapsLockStatus
 CapsLock::
 CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
 CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关 
-SetTimer, noNeedToChangeInputMethod, -200 ; 200ms 犹豫操作时间,
+SetTimer, noNeedToChangeInputMethod, -150 ; 200ms 犹豫操作时间,
 
 KeyWait, CapsLock
 ;CapsLock:=0 ;Capslock最优先置空，来关闭 Capslock+ 功能的触发

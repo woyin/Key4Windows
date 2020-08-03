@@ -207,18 +207,15 @@ return isChange
 globalSettings:
 ;  scriptNameNoSuffix:=RegExReplace(A_ScriptName , "i)(\.ahk|\.exe)$")
 ;----------auto start-------------
-autostartLnk:=A_StartupCommon . "\.lnk"
+autostartLnk:=A_StartupCommon . "\LinuxKey.lnk"
 if(CLsets.global.autostart) ;如果开启开机自启动
 {
-    IfExist, % autostartLnk
-    {
-        FileGetShortcut, %autostartLnk%, lnkTarget
-        if(lnkTarget!=A_ScriptFullPath)
-            FileCreateShortcut, %A_ScriptFullPath%, %autostartLnk%, %A_WorkingDir%
-    }
-    else
+    IfNotExist, % autostartLnk
     {
         FileCreateShortcut, %A_ScriptFullPath%, %autostartLnk%, %A_WorkingDir%
+       ; FileGetShortcut, %autostartLnk%, lnkTarget
+       ; if(lnkTarget!=A_ScriptFullPath)
+       ;     FileCreateShortcut, %A_ScriptFullPath%, %autostartLnk%, %A_WorkingDir%
     }
 }
 else
