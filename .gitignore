@@ -1,6 +1,7 @@
 # =========================
 # Add myself
 # =========================
+*.exe
 
 /CapsLock+run
 /CapsLock icon
