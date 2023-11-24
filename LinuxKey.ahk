@@ -45,57 +45,86 @@ start:
 ;-------程序解释------------------------
 ; 该程序的逻辑与Mac上面的改变按键的逻辑不同
 ; Autohotkey 无法真正意义上实现Capslock的组合键，所以用了两个变量来间接判断Capslock按键到底是被触发了一次，还是按住后与其他组合键一起使用
-; 判断是否触碰了一下啊就松开的通过KeyWait方法，对Capslock 点击松开进行判断，并通过SetTimer 来判断到底是按了一次还是长按，并调整相关的变量值
+; 判断是否触碰了一下就松开的通过KeyWait方法，对Capslock 点击松开进行判断，并通过SetTimer 来判断到底是按了一次还是长按，并调整相关的变量值
 ;--------------------------------------
 
 
 ;-----------------START-----------------
+
+; 尝试将左右Shift 变成左括号"("和右括号")"的输入
+global LeftShiftPress:=0, RightShiftPress:=0
+*LShift::
+    LeftShiftPress := 1
+    keyDownTime := A_TickCount
+    KeyWait, LShift
+    duration := A_TickCount - keyDownTime
+    if duration < 150
+    {
+        send, (
+    }
+    LeftShiftPress := 0
+    return 
+
++*::
+    ; 如果是在短按 Shift 后触发的，则不发送 Shift+键 的组合
+    if (LeftShiftPress)
+    {
+        ; 发送原始键而不是 Shift+键 的组合
+        Send, {%A_ThisHotkey:2%}
+        return
+    }
+    ; 否则，执行默认的 Shift+键 行为
+    return
+
+*RShift::
+    RightShiftPress := 1
+    keyDownTime := A_TickCount
+    KeyWait, RShift
+    duration := A_TickCount - keyDownTime
+    if duration < 150
+    {
+        send, )
+    }
+    RightShiftPress := 0
+    return 
+
+
+
+
+
+
 global CapsLockToChangeInputMethod, CapsLockStatus
 
 CapsLock::
-CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
-CapsLockStatus:=1 ;为是否触发Capslock按键与其他组合键的开关 
-SetTimer, noNeedToChangeInputMethod, -150 ; 200ms 犹豫操作时间,
+    ; 每次按下CapsLock都默认是为了修改输入法，而不是将CapsLock 当作修饰键来用
+    CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
+    ; 默认CapsLock（系统变量）的值为1，即大小写打开（但后续会关闭）
+    CapsLockStatus:=1 
+    ; 同时设置一个定时器，只要按键时间超过阈值，则翻转默认逻辑，即CapsLock成为修饰符而非修改输入法 
+    SetTimer, noNeedToChangeInputMethod, -150
 
-KeyWait, CapsLock
-;CapsLock:=0 ;Capslock最优先置空，来关闭 Capslock+ 功能的触发
-if CapsLockToChangeInputMethod
-{
-;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
-    Send #{Space}
-    setCapsLockToChangeInputMethod()
-}
-CapsLockStatus:=0
-return
+    ; 等待CapsLock 被释放
+    ; 该语句的目的是与后面的两个#IF 形成
+    KeyWait, CapsLock
 
-; 改变输入法状态的开关
-noNeedToChangeInputMethod:
-    setCapsLockToChangeInputMethod()
-return
-
-
-
+    ; 当CapsLock 150ms内松开才会执行这段代码
+    #IF CapsLockToChangeInputMethod
+        ;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
+        Send #{Space}
+        ; 改变CapsLockToChangInputMenthod 为0，避免反复触发这条IF条件
+        setCapsLockTo1ChangeInputMethod()
+        ; 置为0，避免下面CapsLockStatus 的#IF 语句
+    #IF
+    CapsLockStatus:=0
+    return
 
 ;----------------------------keys-set-start-----------------------------
-; 特殊在这个#If，表示后面的表达式如果成为true的时候，我们按下去的按键（大概是吧）将成为一个修饰按键，配合下面的其他键，组成了组合键
-; 此处逻辑绕了一下。
+; 这段#IF 不会被阻塞，因为可以和下面的按键形成组合键，与KeyWait不冲突
+; 如果CapsLock在150ms内被松开，则CapsLockStatus会被置为0，下面所有组合键都不会生效（不过是废话，毕竟CapsLock都被松开了）
 ; 先是通过lib/lib_keysSet.ahk 中的默认定义，为每个配合了CapsLock的组合键做一个默认值
 ; 然后又通过lib/lib_settings.ahk 中的方法，通过读取settings.ini 文件中[Keys] 段的值进行覆盖（用户自定义的覆盖）
 ; 这种做法本质上是以lib_keySet 作为系统默认配置（不需要修改），然后利用setting.ini 文件作为用户配置文件进行修改
-#If CapsLockStatus ;when capslock key press and hold
-
-
-<!WheelUp::
-try
-    runFunc(keyset.caps_lalt_wheelUp)
-
-return
-
-<!WheelDown::
-try
-    runFunc(keyset.caps_lalt_wheelDown)
-
-return
+#IF CapsLockStatus ;when capslock key press and hold
 
 a::
 b::
@@ -674,9 +703,7 @@ return
 ;      
 ;  return
 
-
-
-#If
+#IF
 
 
 
