@@ -344,13 +344,7 @@ SystemCursor(OnOff:=1)   ; 初始化 = "I","Init"; 隐藏 = 0,"Off"; 切换 = -1
     }
 }
 
-; 将全局capsLockStatus 置为0
-setCapsLockToChangeInputMethod(status:=0){
-    ; global CapsLockStatus
-    CapsLockToChangeInputMethod = status
-}
-
 ; 改变输入法状态的开关
 noNeedToChangeInputMethod:
-    setCapsLockToChangeInputMethod()
+    CapsLockToChangeInputMethod:=0
 return

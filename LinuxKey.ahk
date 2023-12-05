@@ -52,70 +52,68 @@ start:
 ;-----------------START-----------------
 
 ; 尝试将左右Shift 变成左括号"("和右括号")"的输入
-global LeftShiftPress:=0, RightShiftPress:=0
-*LShift::
-    LeftShiftPress := 1
-    keyDownTime := A_TickCount
-    KeyWait, LShift
-    duration := A_TickCount - keyDownTime
-    if duration < 150
-    {
-        send, (
-    }
-    LeftShiftPress := 0
-    return 
 
-+*::
-    ; 如果是在短按 Shift 后触发的，则不发送 Shift+键 的组合
-    if (LeftShiftPress)
-    {
-        ; 发送原始键而不是 Shift+键 的组合
-        Send, {%A_ThisHotkey:2%}
+; 设置一个阈值（以毫秒为单位）来决定何时认为是“长按”
+; 可以根据需要调整这个时间
+shiftThreshold := 300
+
+; 初始化变量
+shiftPressedTime := 0
+
+; 当左Shift按下时
+~LShift::  ; '~'符号意味着当Shift被按下时，还允许执行其他功能
+    ; 记录按下的时间
+    shiftPressedTime := A_TickCount
+return
+
+; 当左Shift被释放时
+~LShift Up::
+    ; 计算按下的持续时间
+    duration := A_TickCount - shiftPressedTime
+    ; 如果按下的时间短于阈值，则输入括号
+    if (duration < shiftThreshold) {
+        Send, ()
+        ; 阻止其他键的发送，因为我们已经发送了括号
         return
     }
-    ; 否则，执行默认的 Shift+键 行为
-    return
+    ; 否则不做任何事情，保持Shift的原有功能
+return
 
-*RShift::
-    RightShiftPress := 1
-    keyDownTime := A_TickCount
-    KeyWait, RShift
-    duration := A_TickCount - keyDownTime
-    if duration < 150
-    {
-        send, )
+; 右Shift的处理可以复制左Shift的逻辑
+~RShift:: 
+    shiftPressedTime := A_TickCount
+return
+
+~RShift Up::
+    duration := A_TickCount - shiftPressedTime
+    if (duration < shiftThreshold) {
+        Send, ()
+        return
     }
-    RightShiftPress := 0
-    return 
-
-
-
-
-
+return
 
 global CapsLockToChangeInputMethod, CapsLockStatus
 
+ ; 每次按下CapsLock都默认是为了修改输入法，而不是将CapsLock 当作修饰键来用
 CapsLock::
-    ; 每次按下CapsLock都默认是为了修改输入法，而不是将CapsLock 当作修饰键来用
     CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
     ; 默认CapsLock（系统变量）的值为1，即大小写打开（但后续会关闭）
     CapsLockStatus:=1 
+    CapsLockHoldTime:=300 ;阈值300ms，只要按住的时间不超过300ms，就不会触发下面的定时器
     ; 同时设置一个定时器，只要按键时间超过阈值，则翻转默认逻辑，即CapsLock成为修饰符而非修改输入法 
-    SetTimer, noNeedToChangeInputMethod, -150
+    SetTimer, noNeedToChangeInputMethod, % CapsLockHoldTime
 
     ; 等待CapsLock 被释放
     ; 该语句的目的是与后面的两个#IF 形成
     KeyWait, CapsLock
-
-    ; 当CapsLock 150ms内松开才会执行这段代码
-    #IF CapsLockToChangeInputMethod
-        ;此处的逻辑是：在使用一次之后，立马将下面的语句，即改变输入法状态的语句，不再执行，直接输入windows+space键位
-        Send #{Space}
-        ; 改变CapsLockToChangInputMenthod 为0，避免反复触发这条IF条件
-        setCapsLockTo1ChangeInputMethod()
-        ; 置为0，避免下面CapsLockStatus 的#IF 语句
-    #IF
-    CapsLockStatus:=0
+        ;只要CapsLock松开，就一定要将CapsLockStatus置为0，否则在松开后，依然可以通过单独按键形成组合键
+        ;即原本需要按住CapsLock才能生效的组合键，现在松开后，单独按键，比如a就能触发CapsLock+a的组合键效果
+        ;松开的原因为，因为CapsLock已经松开，所有围绕它的编程都需要作废
+        CapsLockStatus:=0
+    ; 当CapsLockToChangeInputMethod 标识位为1时，改变输入法
+        if CapsLockToChangeInputMethod{
+            ChangeInputMethod()
+        }
     return
 
 ;----------------------------keys-set-start-----------------------------
@@ -124,586 +122,586 @@ CapsLock::
 ; 先是通过lib/lib_keysSet.ahk 中的默认定义，为每个配合了CapsLock的组合键做一个默认值
 ; 然后又通过lib/lib_settings.ahk 中的方法，通过读取settings.ini 文件中[Keys] 段的值进行覆盖（用户自定义的覆盖）
 ; 这种做法本质上是以lib_keySet 作为系统默认配置（不需要修改），然后利用setting.ini 文件作为用户配置文件进行修改
-#IF CapsLockStatus ;when capslock key press and hold
-
-a::
-b::
-c::
-d::
-e::
-f::
-g::
-h::
-i::
-j::
-k::
-l::
-n::
-m::
-o::
-p::
-q::
-r::
-s::
-t::
-u::
-v::
-w::
-x::
-y::
-z::
-1::
-2::
-3::
-4::
-5::
-6::
-7::
-8::
-9::
-0::
-f1::
-f2::
-f3::
-f4::
-f5::
-f6::
-f7::
-f8::
-f9::
-f10::
-f11::
-f12::
-space::
-tab::
-enter::
-esc::
-backspace::
-ralt::
-try
-    runFunc(keyset["caps_" . A_ThisHotkey])
-
-Return
-
-`::
-try
-    runFunc(keyset.caps_backQuote)
-
-return
-
-
--::
-try
-    runFunc(keyset.caps_minus)
-
-return
-
-=::
-try
-    runFunc(keyset.caps_equal)
-
-Return
-
+    #IF CapsLockStatus ;when capslock key press and hold
+
+    a::
+    b::
+    c::
+    d::
+    e::
+    f::
+    g::
+    h::
+    i::
+    j::
+    k::
+    l::
+    n::
+    m::
+    o::
+    p::
+    q::
+    r::
+    s::
+    t::
+    u::
+    v::
+    w::
+    x::
+    y::
+    z::
+    1::
+    2::
+    3::
+    4::
+    5::
+    6::
+    7::
+    8::
+    9::
+    0::
+    f1::
+    f2::
+    f3::
+    f4::
+    f5::
+    f6::
+    f7::
+    f8::
+    f9::
+    f10::
+    f11::
+    f12::
+    space::
+    tab::
+    enter::
+    esc::
+    backspace::
+    ralt::
+    try
+        runFunc(keyset["caps_" . A_ThisHotkey])
+
+    Return
+
+    `::
+    try
+        runFunc(keyset.caps_backQuote)
+
+    return
+
+
+    -::
+    try
+        runFunc(keyset.caps_minus)
+
+    return
+
+    =::
+    try
+        runFunc(keyset.caps_equal)
+
+    Return
+
 
-[::
-try
-    runFunc(keyset.caps_leftSquareBracket)
+    [::
+    try
+        runFunc(keyset.caps_leftSquareBracket)
 
-Return
+    Return
 
-]::
-try
-    runFunc(keyset.caps_rightSquareBracket)
+    ]::
+    try
+        runFunc(keyset.caps_rightSquareBracket)
 
-Return
+    Return
 
-\::
-try
-    runFunc(keyset.caps_backslash)
+    \::
+    try
+        runFunc(keyset.caps_backslash)
 
-return
+    return
 
-`;::
-try
-    runFunc(keyset.caps_semicolon)
+    `;::
+    try
+        runFunc(keyset.caps_semicolon)
 
-Return
+    Return
 
-'::
-try
-    runFunc(keyset.caps_quote)
+    '::
+    try
+        runFunc(keyset.caps_quote)
 
-return
+    return
 
 
-,::
-try
-    runFunc(keyset.caps_comma)
+    ,::
+    try
+        runFunc(keyset.caps_comma)
 
-Return
+    Return
 
-.::
-try
-    runFunc(keyset.caps_dot)
+    .::
+    try
+        runFunc(keyset.caps_dot)
 
-return
+    return
 
-/::
-try
-    runFunc(keyset.caps_slash)
+    /::
+    try
+        runFunc(keyset.caps_slash)
 
-Return
+    Return
 
-;  RAlt::
-;  try
-;      runFunc(keyset.caps_ralt)
-;  
-;  return
+    ;  RAlt::
+    ;  try
+    ;      runFunc(keyset.caps_ralt)
+    ;  
+    ;  return
 
 
 
-;---------------------caps+lalt----------------
+    ;---------------------caps+lalt----------------
 
-<!a::
-try
-    runFunc(keyset.caps_lalt_a)
+    <!a::
+    try
+        runFunc(keyset.caps_lalt_a)
 
-return
+    return
 
-<!b::
-try
-    runFunc(keyset.caps_lalt_b)
+    <!b::
+    try
+        runFunc(keyset.caps_lalt_b)
 
-Return
+    Return
 
-<!c::
-try
-    runFunc(keyset.caps_lalt_c)
+    <!c::
+    try
+        runFunc(keyset.caps_lalt_c)
 
-return
+    return
 
-<!d::
-try
-    runFunc(keyset.caps_lalt_d)
+    <!d::
+    try
+        runFunc(keyset.caps_lalt_d)
 
-Return
+    Return
 
-<!e::
-try
-    runFunc(keyset.caps_lalt_e)
+    <!e::
+    try
+        runFunc(keyset.caps_lalt_e)
 
-Return
+    Return
 
-<!f::
-try
-    runFunc(keyset.caps_lalt_f)
+    <!f::
+    try
+        runFunc(keyset.caps_lalt_f)
 
-Return
+    Return
 
-<!g::
-try
-    runFunc(keyset.caps_lalt_g)
+    <!g::
+    try
+        runFunc(keyset.caps_lalt_g)
 
-Return
+    Return
 
-<!h::
-try
-    runFunc(keyset.caps_lalt_h)
+    <!h::
+    try
+        runFunc(keyset.caps_lalt_h)
 
-return
+    return
 
-<!i::
-try
-    runFunc(keyset.caps_lalt_i)
+    <!i::
+    try
+        runFunc(keyset.caps_lalt_i)
 
-return
+    return
 
-<!j::
-try
-    runFunc(keyset.caps_lalt_j)
+    <!j::
+    try
+        runFunc(keyset.caps_lalt_j)
 
-return
+    return
 
-<!k::
-try
-    runFunc(keyset.caps_lalt_k)
+    <!k::
+    try
+        runFunc(keyset.caps_lalt_k)
 
-return
+    return
 
-<!l::
-try
-    runFunc(keyset.caps_lalt_l)
+    <!l::
+    try
+        runFunc(keyset.caps_lalt_l)
 
-return
+    return
 
-<!m::
-try
-    runFunc(keyset.caps_lalt_m)
+    <!m::
+    try
+        runFunc(keyset.caps_lalt_m)
 
-return
+    return
 
-<!n::
-try
-    runFunc(keyset.caps_lalt_n)
+    <!n::
+    try
+        runFunc(keyset.caps_lalt_n)
 
-Return
+    Return
 
-<!o::
-try
-    runFunc(keyset.caps_lalt_o)
+    <!o::
+    try
+        runFunc(keyset.caps_lalt_o)
 
-return
+    return
 
-<!p::
-try
-    runFunc(keyset.caps_lalt_p)
+    <!p::
+    try
+        runFunc(keyset.caps_lalt_p)
 
-Return
+    Return
 
-<!q::
-try
-    runFunc(keyset.caps_lalt_q)
+    <!q::
+    try
+        runFunc(keyset.caps_lalt_q)
 
-return
+    return
 
-<!r::
-try
-    runFunc(keyset.caps_lalt_r)
+    <!r::
+    try
+        runFunc(keyset.caps_lalt_r)
 
-Return
+    Return
 
-<!s::
-try
-    runFunc(keyset.caps_lalt_s)
+    <!s::
+    try
+        runFunc(keyset.caps_lalt_s)
 
-Return
+    Return
 
-<!t::
-try
-    runFunc(keyset.caps_lalt_t)
+    <!t::
+    try
+        runFunc(keyset.caps_lalt_t)
 
-Return
+    Return
 
-<!u::
-try
-    runFunc(keyset.caps_lalt_u)
+    <!u::
+    try
+        runFunc(keyset.caps_lalt_u)
 
-return
+    return
 
-<!v::
-try
-    runFunc(keyset.caps_lalt_v)
+    <!v::
+    try
+        runFunc(keyset.caps_lalt_v)
 
-Return
+    Return
 
-<!w::
-try
-    runFunc(keyset.caps_lalt_w)
+    <!w::
+    try
+        runFunc(keyset.caps_lalt_w)
 
-Return
+    Return
 
-<!x::
-try
-    runFunc(keyset.caps_lalt_x)
+    <!x::
+    try
+        runFunc(keyset.caps_lalt_x)
 
-Return
+    Return
 
-<!y::
-try
-    runFunc(keyset.caps_lalt_y)
+    <!y::
+    try
+        runFunc(keyset.caps_lalt_y)
 
-return
+    return
 
-<!z::
-try
-    runFunc(keyset.caps_lalt_z)
+    <!z::
+    try
+        runFunc(keyset.caps_lalt_z)
 
-Return
+    Return
 
-<!`::
-    runFunc(keyset.caps_lalt_backquote)
+    <!`::
+        runFunc(keyset.caps_lalt_backquote)
 
-return
+    return
 
-<!1::
-try
-    runFunc(keyset.caps_lalt_1)
+    <!1::
+    try
+        runFunc(keyset.caps_lalt_1)
 
-return
+    return
 
-<!2::
-try
-    runFunc(keyset.caps_lalt_2)
+    <!2::
+    try
+        runFunc(keyset.caps_lalt_2)
 
-return
+    return
 
-<!3::
-try
-    runFunc(keyset.caps_lalt_3)
+    <!3::
+    try
+        runFunc(keyset.caps_lalt_3)
 
-return
+    return
 
-<!4::
-try
-    runFunc(keyset.caps_lalt_4)
+    <!4::
+    try
+        runFunc(keyset.caps_lalt_4)
 
-return
+    return
 
-<!5::
-try
-    runFunc(keyset.caps_lalt_5)
+    <!5::
+    try
+        runFunc(keyset.caps_lalt_5)
 
-return
+    return
 
-<!6::
-try
-    runFunc(keyset.caps_lalt_6)
+    <!6::
+    try
+        runFunc(keyset.caps_lalt_6)
 
-return
+    return
 
-<!7::
-try
-    runFunc(keyset.caps_lalt_7)
+    <!7::
+    try
+        runFunc(keyset.caps_lalt_7)
 
-return
+    return
 
-<!8::
-try
-    runFunc(keyset.caps_lalt_8)
+    <!8::
+    try
+        runFunc(keyset.caps_lalt_8)
 
-return
+    return
 
-<!9::
-try
-    runFunc(keyset.caps_lalt_9)
+    <!9::
+    try
+        runFunc(keyset.caps_lalt_9)
 
-Return
+    Return
 
-<!0::
-try
-    runFunc(keyset.caps_lalt_0)
+    <!0::
+    try
+        runFunc(keyset.caps_lalt_0)
 
-Return
+    Return
 
-<!-::
-try
-    runFunc(keyset.caps_lalt_minus)
+    <!-::
+    try
+        runFunc(keyset.caps_lalt_minus)
 
-return
+    return
 
-<!=::
-try
-    runFunc(keyset.caps_lalt_equal)
+    <!=::
+    try
+        runFunc(keyset.caps_lalt_equal)
 
-Return
+    Return
 
-<!BackSpace::
-try
-    runFunc(keyset.caps_lalt_backspace)
+    <!BackSpace::
+    try
+        runFunc(keyset.caps_lalt_backspace)
 
-Return
+    Return
 
-<!Tab::
-try
-    runFunc(keyset.caps_lalt_tab)
+    <!Tab::
+    try
+        runFunc(keyset.caps_lalt_tab)
 
-Return
+    Return
 
-<![::
-try
-    runFunc(keyset.caps_lalt_leftSquareBracket)
+    <![::
+    try
+        runFunc(keyset.caps_lalt_leftSquareBracket)
 
-Return
+    Return
 
-<!]::
-try
-    runFunc(keyset.caps_lalt_rightSquareBracket)
+    <!]::
+    try
+        runFunc(keyset.caps_lalt_rightSquareBracket)
 
-Return
+    Return
 
-<!\::
-try
-    runFunc(keyset.caps_lalt_Backslash)
+    <!\::
+    try
+        runFunc(keyset.caps_lalt_Backslash)
 
-return
+    return
 
-<!`;::
-try
-    runFunc(keyset.caps_lalt_semicolon)
+    <!`;::
+    try
+        runFunc(keyset.caps_lalt_semicolon)
 
-Return
+    Return
 
-<!'::
-try
-    runFunc(keyset.caps_lalt_quote)
+    <!'::
+    try
+        runFunc(keyset.caps_lalt_quote)
 
-return
+    return
 
-<!Enter::
-try
-    runFunc(keyset.caps_lalt_enter)
+    <!Enter::
+    try
+        runFunc(keyset.caps_lalt_enter)
 
-Return
+    Return
 
-<!,::
-try
-    runFunc(keyset.caps_lalt_comma)
+    <!,::
+    try
+        runFunc(keyset.caps_lalt_comma)
 
-Return
+    Return
 
-<!.::
-try
-    runFunc(keyset.caps_lalt_dot)
+    <!.::
+    try
+        runFunc(keyset.caps_lalt_dot)
 
-return
+    return
 
-<!/::
-try
-    runFunc(keyset.caps_lalt_slash)
+    <!/::
+    try
+        runFunc(keyset.caps_lalt_slash)
 
-Return
+    Return
 
-<!Space::
-try
-    runFunc(keyset.caps_lalt_space)
+    <!Space::
+    try
+        runFunc(keyset.caps_lalt_space)
 
-Return
+    Return
 
-<!RAlt::
-try
-    runFunc(keyset.caps_lalt_ralt)
+    <!RAlt::
+    try
+        runFunc(keyset.caps_lalt_ralt)
 
-return
+    return
 
-<!F1::
-try
-    runFunc(keyset.caps_lalt_f1)
+    <!F1::
+    try
+        runFunc(keyset.caps_lalt_f1)
 
-return
+    return
 
-<!F2::
-try
-    runFunc(keyset.caps_lalt_f2)
+    <!F2::
+    try
+        runFunc(keyset.caps_lalt_f2)
 
-return
+    return
 
-<!F3::
-try
-    runFunc(keyset.caps_lalt_f3)
+    <!F3::
+    try
+        runFunc(keyset.caps_lalt_f3)
 
-return
+    return
 
-<!F4::
-try
-    runFunc(keyset.caps_lalt_f4)
+    <!F4::
+    try
+        runFunc(keyset.caps_lalt_f4)
 
-return
+    return
 
-<!F5::
-try
-    runFunc(keyset.caps_lalt_f5)
+    <!F5::
+    try
+        runFunc(keyset.caps_lalt_f5)
 
-return
+    return
 
-<!F6::
-try
-    runFunc(keyset.caps_lalt_f6)
+    <!F6::
+    try
+        runFunc(keyset.caps_lalt_f6)
 
-return
+    return
 
-<!F7::
-try
-    runFunc(keyset.caps_lalt_f7)
+    <!F7::
+    try
+        runFunc(keyset.caps_lalt_f7)
 
-return
+    return
 
-<!F8::
-try
-    runFunc(keyset.caps_lalt_f8)
+    <!F8::
+    try
+        runFunc(keyset.caps_lalt_f8)
 
-return
+    return
 
-<!F9::
-try
-    runFunc(keyset.caps_lalt_f9)
+    <!F9::
+    try
+        runFunc(keyset.caps_lalt_f9)
 
-return
+    return
 
-<!F10::
-try
-    runFunc(keyset.caps_lalt_f10)
+    <!F10::
+    try
+        runFunc(keyset.caps_lalt_f10)
 
-return
+    return
 
-<!F11::
-try
-    runFunc(keyset.caps_lalt_f11)
+    <!F11::
+    try
+        runFunc(keyset.caps_lalt_f11)
 
-return
+    return
 
-<!F12::
-try
-    runFunc(keyset.caps_lalt_f12)
+    <!F12::
+    try
+        runFunc(keyset.caps_lalt_f12)
 
-return
+    return
 
 
-;  #s::
-;      keyFunc_activateSideWin("l")
-;  
-;  return
+    ;  #s::
+    ;      keyFunc_activateSideWin("l")
+    ;  
+    ;  return
 
-;  #f::
-;      keyFunc_activateSideWin("r")
-;      
-;  return
+    ;  #f::
+    ;      keyFunc_activateSideWin("r")
+    ;      
+    ;  return
 
-;  #e::
-;      keyFunc_activateSideWin("u")
-;  
-;  return
+    ;  #e::
+    ;      keyFunc_activateSideWin("u")
+    ;  
+    ;  return
 
-;  #d::
-;      keyFunc_activateSideWin("d")
-;      
-;  return
+    ;  #d::
+    ;      keyFunc_activateSideWin("d")
+    ;      
+    ;  return
 
-;  #w::
-;      keyFunc_putWinToBottom()
-;      
-;  return
+    ;  #w::
+    ;      keyFunc_putWinToBottom()
+    ;      
+    ;  return
 
-;  #a::
-;      keyFunc_activateSideWin("fl")
-;      
-;  return
+    ;  #a::
+    ;      keyFunc_activateSideWin("fl")
+    ;      
+    ;  return
 
-;  #g::
-;      keyFunc_activateSideWin("fr")
-;      
-;  return
+    ;  #g::
+    ;      keyFunc_activateSideWin("fr")
+    ;      
+    ;  return
 
-;  #z::
-;      keyFunc_clearWinMinimizeStach()
-;      
-;  return
+    ;  #z::
+    ;      keyFunc_clearWinMinimizeStach()
+    ;      
+    ;  return
 
-;  #x::
-;      keyFunc_inWinMinimizeStack(true)
-;      
-;  return
+    ;  #x::
+    ;      keyFunc_inWinMinimizeStack(true)
+    ;      
+    ;  return
 
-;  #c::
-;      keyFunc_inWinMinimizeStack()
-;      
-;  return
+    ;  #c::
+    ;      keyFunc_inWinMinimizeStack()
+    ;      
+    ;  return
 
-;  #v::
-;      keyFunc_outWinMinimizeStack()
-;      
-;  return
+    ;  #v::
+    ;      keyFunc_outWinMinimizeStack()
+    ;      
+    ;  return
 
-#IF
+    #IF
 
 
 
