@@ -5,13 +5,12 @@ if not A_IsAdmin ;running by administrator
    ExitApp 0
 }
 
-
 IfExist, Retro_Mario.ico
 {
-;freezing icon
-menu, TRAY, Icon, Retro_Mario.ico, , 1
+    ;freezing icon
+    menu, TRAY, Icon, Retro_Mario.ico, , 1
 }
-Menu, Tray, Icon,,, 1
+; Menu, Tray, Icon,,, 1
 
 global CLversion:="Copyright by Woyin" 
 
@@ -42,11 +41,6 @@ Process Priority,,High
 start:
 ; Make some other Things
 #Include %A_ScriptDir%\userAHK\main.ahk
-;-------程序解释------------------------
-; 该程序的逻辑与Mac上面的改变按键的逻辑不同
-; Autohotkey 无法真正意义上实现Capslock的组合键，所以用了两个变量来间接判断Capslock按键到底是被触发了一次，还是按住后与其他组合键一起使用
-; 判断是否触碰了一下就松开的通过KeyWait方法，对Capslock 点击松开进行判断，并通过SetTimer 来判断到底是按了一次还是长按，并调整相关的变量值
-;--------------------------------------
 
 
 ;-----------------START-----------------
@@ -57,40 +51,25 @@ start:
 ; 可以根据需要调整这个时间
 shiftThreshold := 300
 
-; 初始化变量
-shiftPressedTime := 0
-
-; 当左Shift按下时
-~LShift::  ; '~'符号意味着当Shift被按下时，还允许执行其他功能
-    ; 记录按下的时间
-    shiftPressedTime := A_TickCount
-return
-
-; 当左Shift被释放时
+; 左Shift键的设置
 ~LShift Up::
-    ; 计算按下的持续时间
-    duration := A_TickCount - shiftPressedTime
-    ; 如果按下的时间短于阈值，则输入括号
-    if (duration < shiftThreshold) {
-        Send, ()
-        ; 阻止其他键的发送，因为我们已经发送了括号
-        return
-    }
-    ; 否则不做任何事情，保持Shift的原有功能
-return
+    if (A_PriorKey = "LShift" and A_TimeSincePriorHotkey < shiftThreshold) 
+        SendRaw, (
+        ;Send, {(}
+Return
 
-; 右Shift的处理可以复制左Shift的逻辑
-~RShift:: 
-    shiftPressedTime := A_TickCount
-return
-
+; 右Shift键的设置
 ~RShift Up::
-    duration := A_TickCount - shiftPressedTime
-    if (duration < shiftThreshold) {
-        Send, ()
-        return
-    }
-return
+    if (A_PriorKey = "RShift" and A_TimeSincePriorHotkey < shiftThreshold) 
+        SendRaw, )
+        ;Send, {)}
+Return
+
+;-------程序解释------------------------
+; 该程序的逻辑与Mac上面的改变按键的逻辑不同
+; Autohotkey 无法真正意义上实现Capslock的组合键，所以用了两个变量来间接判断Capslock按键到底是被触发了一次，还是按住后与其他组合键一起使用
+; 判断是否触碰了一下就松开的通过KeyWait方法，对Capslock 点击松开进行判断，并通过SetTimer 来判断到底是按了一次还是长按，并调整相关的变量值
+;--------------------------------------
 
 global CapsLockToChangeInputMethod, CapsLockStatus
 
