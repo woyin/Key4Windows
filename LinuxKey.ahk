@@ -1,9 +1,4 @@
 ﻿#SingleInstance force
-if not A_IsAdmin ;running by administrator
-{
-   Run *RunAs "%A_ScriptFullPath%" 
-   ExitApp 0
-}
 
 IfExist, Retro_Mario.ico
 {
@@ -14,34 +9,8 @@ IfExist, Retro_Mario.ico
 
 global CLversion:="Copyright by Woyin" 
 
-;The beginning of all things
-#Include %A_ScriptDir%\lib\lib_init.ahk 
-#include %A_ScriptDir%\lib\lib_keysFunction.ahk
-#include %A_ScriptDir%\lib\lib_keysSet.ahk
-;get the settings from capslock+settings.ini 
-#include %A_ScriptDir%\lib\lib_settings.ahk 
-;public functions
-#Include %A_ScriptDir%\lib\lib_functions.ahk 
-#include %A_ScriptDir%\lib\lib_loadAnimation.ahk
-
-; language
-#include %A_ScriptDir%\language\lang_func.ahk
-#include %A_ScriptDir%\language\Simplified_Chinese.ahk
-
-;change dir
-;#include ..\userAHK
-;#include *i main.ahk
-
-#MaxHotkeysPerInterval 500
-#NoEnv
-;  #WinActivateForce
-Process Priority,,High
-
-
-start:
-; Make some other Things
-#Include %A_ScriptDir%\userAHK\main.ahk
-
+#Include %A_ScriptDir%\lib\lib_functions.ahk
+#Include %A_ScriptDir%\lib\lib_KeysFunction.ahk
 
 ;-----------------START-----------------
 
@@ -49,21 +18,40 @@ start:
 
 ; 设置一个阈值（以毫秒为单位）来决定何时认为是“长按”
 ; 可以根据需要调整这个时间
-shiftThreshold := 300
 
-; 左Shift键的设置
-~LShift Up::
-    if (A_PriorKey = "LShift" and A_TimeSincePriorHotkey < shiftThreshold) 
-        SendRaw, (
-        ;Send, {(}
-Return
+LShift::
+    keyWait, LShift, T0.01
+    if (ErrorLevel) {
+        startTime := A_TickCount
+        while GetKeyState("LShift", "P") {
+            ; Lasting Time is bigger than xxx ms
+            if ((A_TickCount - startTime) > 100) {
+                SendInput, {LShift down}
+                KeyWait, LShift
+                SendInput, {LShift up}
+                return
+            }
+        }
+        Send, {(}
+    }
+return
 
-; 右Shift键的设置
-~RShift Up::
-    if (A_PriorKey = "RShift" and A_TimeSincePriorHotkey < shiftThreshold) 
-        SendRaw, )
-        ;Send, {)}
-Return
+RShift::
+    keyWait, RShift, T0.01
+    if (ErrorLevel) {
+        startTime := A_TickCount
+        while GetKeyState("RShift", "P") {
+            ; Lasting Time is bigger than xxx ms
+            if ((A_TickCount - startTime) > 100) {
+                SendInput, {RShift down}
+                KeyWait, RShift
+                SendInput, {RShift up}
+                return
+            }
+        }
+        Send, {)}
+    }
+return
 
 ;-------程序解释------------------------
 ; 该程序的逻辑与Mac上面的改变按键的逻辑不同
@@ -91,7 +79,10 @@ CapsLock::
         CapsLockStatus:=0
     ; 当CapsLockToChangeInputMethod 标识位为1时，改变输入法
         if CapsLockToChangeInputMethod{
-            ChangeInputMethod()
+            send #{Space}
+
+    ; 全局变量置为0，避免反复执行切换输入法操作
+            CapsLockToChangeInputMethod:=0
         }
     return
 
@@ -104,11 +95,23 @@ CapsLock::
     #IF CapsLockStatus ;when capslock key press and hold
 
     a::
+        keyFunc_moveHome()
+    Return
     b::
+        keyFunc_moveLeft()
+    Return
     c::
+        keyFunc_ditto()
+    Return
     d::
+        keyFunc_delete()
+    Return
     e::
+        keyFunc_moveEnd()
+    Return
     f::
+        keyFunc_moveRight()
+    Return
     g::
     h::
     i::
@@ -116,9 +119,13 @@ CapsLock::
     k::
     l::
     n::
+        keyFunc_moveDown()
+    Return
     m::
     o::
     p::
+        keyFunc_moveUp()
+    Return
     q::
     r::
     s::
@@ -157,535 +164,5 @@ CapsLock::
     esc::
     backspace::
     ralt::
-    try
-        runFunc(keyset["caps_" . A_ThisHotkey])
-
-    Return
-
-    `::
-    try
-        runFunc(keyset.caps_backQuote)
-
-    return
-
-
-    -::
-    try
-        runFunc(keyset.caps_minus)
-
-    return
-
-    =::
-    try
-        runFunc(keyset.caps_equal)
-
-    Return
-
-
-    [::
-    try
-        runFunc(keyset.caps_leftSquareBracket)
-
-    Return
-
-    ]::
-    try
-        runFunc(keyset.caps_rightSquareBracket)
-
-    Return
-
-    \::
-    try
-        runFunc(keyset.caps_backslash)
-
-    return
-
-    `;::
-    try
-        runFunc(keyset.caps_semicolon)
-
-    Return
-
-    '::
-    try
-        runFunc(keyset.caps_quote)
-
-    return
-
-
-    ,::
-    try
-        runFunc(keyset.caps_comma)
-
-    Return
-
-    .::
-    try
-        runFunc(keyset.caps_dot)
-
-    return
-
-    /::
-    try
-        runFunc(keyset.caps_slash)
-
-    Return
-
-    ;  RAlt::
-    ;  try
-    ;      runFunc(keyset.caps_ralt)
-    ;  
-    ;  return
-
-
-
-    ;---------------------caps+lalt----------------
-
-    <!a::
-    try
-        runFunc(keyset.caps_lalt_a)
-
-    return
-
-    <!b::
-    try
-        runFunc(keyset.caps_lalt_b)
-
-    Return
-
-    <!c::
-    try
-        runFunc(keyset.caps_lalt_c)
-
-    return
-
-    <!d::
-    try
-        runFunc(keyset.caps_lalt_d)
-
-    Return
-
-    <!e::
-    try
-        runFunc(keyset.caps_lalt_e)
-
-    Return
-
-    <!f::
-    try
-        runFunc(keyset.caps_lalt_f)
-
-    Return
-
-    <!g::
-    try
-        runFunc(keyset.caps_lalt_g)
-
-    Return
-
-    <!h::
-    try
-        runFunc(keyset.caps_lalt_h)
-
-    return
-
-    <!i::
-    try
-        runFunc(keyset.caps_lalt_i)
-
-    return
-
-    <!j::
-    try
-        runFunc(keyset.caps_lalt_j)
-
-    return
-
-    <!k::
-    try
-        runFunc(keyset.caps_lalt_k)
-
-    return
-
-    <!l::
-    try
-        runFunc(keyset.caps_lalt_l)
-
-    return
-
-    <!m::
-    try
-        runFunc(keyset.caps_lalt_m)
-
-    return
-
-    <!n::
-    try
-        runFunc(keyset.caps_lalt_n)
-
-    Return
-
-    <!o::
-    try
-        runFunc(keyset.caps_lalt_o)
-
-    return
-
-    <!p::
-    try
-        runFunc(keyset.caps_lalt_p)
-
-    Return
-
-    <!q::
-    try
-        runFunc(keyset.caps_lalt_q)
-
-    return
-
-    <!r::
-    try
-        runFunc(keyset.caps_lalt_r)
-
-    Return
-
-    <!s::
-    try
-        runFunc(keyset.caps_lalt_s)
-
-    Return
-
-    <!t::
-    try
-        runFunc(keyset.caps_lalt_t)
-
-    Return
-
-    <!u::
-    try
-        runFunc(keyset.caps_lalt_u)
-
-    return
-
-    <!v::
-    try
-        runFunc(keyset.caps_lalt_v)
-
-    Return
-
-    <!w::
-    try
-        runFunc(keyset.caps_lalt_w)
-
-    Return
-
-    <!x::
-    try
-        runFunc(keyset.caps_lalt_x)
-
-    Return
-
-    <!y::
-    try
-        runFunc(keyset.caps_lalt_y)
-
-    return
-
-    <!z::
-    try
-        runFunc(keyset.caps_lalt_z)
-
-    Return
-
-    <!`::
-        runFunc(keyset.caps_lalt_backquote)
-
-    return
-
-    <!1::
-    try
-        runFunc(keyset.caps_lalt_1)
-
-    return
-
-    <!2::
-    try
-        runFunc(keyset.caps_lalt_2)
-
-    return
-
-    <!3::
-    try
-        runFunc(keyset.caps_lalt_3)
-
-    return
-
-    <!4::
-    try
-        runFunc(keyset.caps_lalt_4)
-
-    return
-
-    <!5::
-    try
-        runFunc(keyset.caps_lalt_5)
-
-    return
-
-    <!6::
-    try
-        runFunc(keyset.caps_lalt_6)
-
-    return
-
-    <!7::
-    try
-        runFunc(keyset.caps_lalt_7)
-
-    return
-
-    <!8::
-    try
-        runFunc(keyset.caps_lalt_8)
-
-    return
-
-    <!9::
-    try
-        runFunc(keyset.caps_lalt_9)
-
-    Return
-
-    <!0::
-    try
-        runFunc(keyset.caps_lalt_0)
-
-    Return
-
-    <!-::
-    try
-        runFunc(keyset.caps_lalt_minus)
-
-    return
-
-    <!=::
-    try
-        runFunc(keyset.caps_lalt_equal)
-
-    Return
-
-    <!BackSpace::
-    try
-        runFunc(keyset.caps_lalt_backspace)
-
-    Return
-
-    <!Tab::
-    try
-        runFunc(keyset.caps_lalt_tab)
-
-    Return
-
-    <![::
-    try
-        runFunc(keyset.caps_lalt_leftSquareBracket)
-
-    Return
-
-    <!]::
-    try
-        runFunc(keyset.caps_lalt_rightSquareBracket)
-
-    Return
-
-    <!\::
-    try
-        runFunc(keyset.caps_lalt_Backslash)
-
-    return
-
-    <!`;::
-    try
-        runFunc(keyset.caps_lalt_semicolon)
-
-    Return
-
-    <!'::
-    try
-        runFunc(keyset.caps_lalt_quote)
-
-    return
-
-    <!Enter::
-    try
-        runFunc(keyset.caps_lalt_enter)
-
-    Return
-
-    <!,::
-    try
-        runFunc(keyset.caps_lalt_comma)
-
-    Return
-
-    <!.::
-    try
-        runFunc(keyset.caps_lalt_dot)
-
-    return
-
-    <!/::
-    try
-        runFunc(keyset.caps_lalt_slash)
-
-    Return
-
-    <!Space::
-    try
-        runFunc(keyset.caps_lalt_space)
-
-    Return
-
-    <!RAlt::
-    try
-        runFunc(keyset.caps_lalt_ralt)
-
-    return
-
-    <!F1::
-    try
-        runFunc(keyset.caps_lalt_f1)
-
-    return
-
-    <!F2::
-    try
-        runFunc(keyset.caps_lalt_f2)
-
-    return
-
-    <!F3::
-    try
-        runFunc(keyset.caps_lalt_f3)
-
-    return
-
-    <!F4::
-    try
-        runFunc(keyset.caps_lalt_f4)
-
-    return
-
-    <!F5::
-    try
-        runFunc(keyset.caps_lalt_f5)
-
-    return
-
-    <!F6::
-    try
-        runFunc(keyset.caps_lalt_f6)
-
-    return
-
-    <!F7::
-    try
-        runFunc(keyset.caps_lalt_f7)
-
-    return
-
-    <!F8::
-    try
-        runFunc(keyset.caps_lalt_f8)
-
-    return
-
-    <!F9::
-    try
-        runFunc(keyset.caps_lalt_f9)
-
-    return
-
-    <!F10::
-    try
-        runFunc(keyset.caps_lalt_f10)
-
-    return
-
-    <!F11::
-    try
-        runFunc(keyset.caps_lalt_f11)
-
-    return
-
-    <!F12::
-    try
-        runFunc(keyset.caps_lalt_f12)
-
-    return
-
-
-    ;  #s::
-    ;      keyFunc_activateSideWin("l")
-    ;  
-    ;  return
-
-    ;  #f::
-    ;      keyFunc_activateSideWin("r")
-    ;      
-    ;  return
-
-    ;  #e::
-    ;      keyFunc_activateSideWin("u")
-    ;  
-    ;  return
-
-    ;  #d::
-    ;      keyFunc_activateSideWin("d")
-    ;      
-    ;  return
-
-    ;  #w::
-    ;      keyFunc_putWinToBottom()
-    ;      
-    ;  return
-
-    ;  #a::
-    ;      keyFunc_activateSideWin("fl")
-    ;      
-    ;  return
-
-    ;  #g::
-    ;      keyFunc_activateSideWin("fr")
-    ;      
-    ;  return
-
-    ;  #z::
-    ;      keyFunc_clearWinMinimizeStach()
-    ;      
-    ;  return
-
-    ;  #x::
-    ;      keyFunc_inWinMinimizeStack(true)
-    ;      
-    ;  return
-
-    ;  #c::
-    ;      keyFunc_inWinMinimizeStack()
-    ;      
-    ;  return
-
-    ;  #v::
-    ;      keyFunc_outWinMinimizeStack()
-    ;      
-    ;  return
 
     #IF
-
-
-
-
-GuiClose:
-GuiEscape:
-Gui, Cancel
-return
