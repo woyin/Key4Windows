@@ -89,9 +89,6 @@ CapsLock::
 ;----------------------------keys-set-start-----------------------------
 ; 这段#IF 不会被阻塞，因为可以和下面的按键形成组合键，与KeyWait不冲突
 ; 如果CapsLock在150ms内被松开，则CapsLockStatus会被置为0，下面所有组合键都不会生效（不过是废话，毕竟CapsLock都被松开了）
-; 先是通过lib/lib_keysSet.ahk 中的默认定义，为每个配合了CapsLock的组合键做一个默认值
-; 然后又通过lib/lib_settings.ahk 中的方法，通过读取settings.ini 文件中[Keys] 段的值进行覆盖（用户自定义的覆盖）
-; 这种做法本质上是以lib_keySet 作为系统默认配置（不需要修改），然后利用setting.ini 文件作为用户配置文件进行修改
     #IF CapsLockStatus ;when capslock key press and hold
 
     a::
