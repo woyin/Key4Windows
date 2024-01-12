@@ -11,6 +11,7 @@ global CLversion:="Copyright by Woyin"
 
 #Include %A_ScriptDir%\lib\lib_functions.ahk
 #Include %A_ScriptDir%\lib\lib_KeysFunction.ahk
+#Include %A_ScriptDir%\lib\lib_macKeys.ahk
 
 ;-----------------START-----------------
 
