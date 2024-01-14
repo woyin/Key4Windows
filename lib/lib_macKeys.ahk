@@ -6,3 +6,6 @@
 !z::Send, ^z    ; 回滚/撤销 (Undo)
 !y::Send, ^y    ; 重做 (Redo)
 !w::send, ^w    ; 关闭标签
+!t::send, ^t    ; 新增标签
+!f::send, ^f    ; 查找
+!s::send, ^s    ; 保存

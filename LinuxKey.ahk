@@ -25,15 +25,21 @@ LShift::
     if (ErrorLevel) {
         startTime := A_TickCount
         while GetKeyState("LShift", "P") {
-            ; Lasting Time is bigger than xxx ms
+            ; make sure the Shift works well
+            SendInput, {LShift down}
+            KeyWait, LShift
+            SendInput, {LShift up}
+            ; Lasting Time is bigger than 100 ms
+            ; the logic must be greater than 100ms
+            ; or when you click combo key(Shift + D, etc.), you will get a "(" first
             if ((A_TickCount - startTime) > 100) {
-                SendInput, {LShift down}
-                KeyWait, LShift
-                SendInput, {LShift up}
                 return
+            } Else {
+                Send, {(}
+                return
+
             }
         }
-        Send, {(}
     }
 return
 
@@ -42,15 +48,18 @@ RShift::
     if (ErrorLevel) {
         startTime := A_TickCount
         while GetKeyState("RShift", "P") {
-            ; Lasting Time is bigger than xxx ms
+            ; make sure the Shift works well
+            SendInput, {LShift down}
+            KeyWait, LShift
+            SendInput, {LShift up}
             if ((A_TickCount - startTime) > 100) {
-                SendInput, {RShift down}
-                KeyWait, RShift
-                SendInput, {RShift up}
                 return
+            } Else {
+                Send, {)}
+                return
+
             }
         }
-        Send, {)}
     }
 return
 
