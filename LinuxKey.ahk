@@ -29,19 +29,14 @@ LShift::
             SendInput, {LShift down}
             KeyWait, LShift
             SendInput, {LShift up}
-            ; Lasting Time is bigger than 100 ms
-            ; the logic must be greater than 100ms
-            ; or when you click combo key(Shift + D, etc.), you will get a "(" first
-            if ((A_TickCount - startTime) > 100) {
-                return
-            } Else {
+            ; Lasting Time is less than 150 ms
+            if ((A_TickCount - startTime) < 150) {
                 Send, {(}
-                return
-
+            }
+                
             }
         }
-    }
-return
+Return
 
 RShift::
     keyWait, RShift, T0.01
@@ -49,19 +44,15 @@ RShift::
         startTime := A_TickCount
         while GetKeyState("RShift", "P") {
             ; make sure the Shift works well
-            SendInput, {LShift down}
-            KeyWait, LShift
-            SendInput, {LShift up}
-            if ((A_TickCount - startTime) > 100) {
-                return
-            } Else {
+            SendInput, {RShift down}
+            KeyWait, RShift
+            SendInput, {RShift up}
+            if ((A_TickCount - startTime) < 150) {
                 Send, {)}
-                return
-
             }
         }
     }
-return
+Return
 
 ;-------程序解释------------------------
 ; 该程序的逻辑与Mac上面的改变按键的逻辑不同
