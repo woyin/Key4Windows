@@ -9,3 +9,6 @@
 !t::send, ^t    ; 新增标签
 !f::send, ^f    ; 查找
 !s::send, ^s    ; 保存
+!b::send, ^b    ; 粗体
+!i::send, ^i    ; 斜体
+!q::send, !{F4} ; 关闭
