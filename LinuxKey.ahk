@@ -20,6 +20,7 @@ global CLversion:="Copyright by Woyin"
 ; 设置一个阈值（以毫秒为单位）来决定何时认为是“长按”
 ; 可以根据需要调整这个时间
 
+global abc := false
 LShift::
     keyWait, LShift, T0.01
     if (ErrorLevel) {
@@ -27,15 +28,14 @@ LShift::
         while GetKeyState("LShift", "P") {
             ; make sure the Shift works well
             SendInput, {LShift down}
-            KeyWait, LShift
-            SendInput, {LShift up}
+            KeyWait, LShift ; 等待按键释放
             ; Lasting Time is less than 150 ms
-            if ((A_TickCount - startTime) < 150) {
+            if (((A_TickCount - startTime) < 150) && A_PriorKey == "LShift") {
                 Send, {(}
             }
-                
-            }
+            SendInput, {LShift up}
         }
+    }
 Return
 
 RShift::
@@ -46,10 +46,10 @@ RShift::
             ; make sure the Shift works well
             SendInput, {RShift down}
             KeyWait, RShift
-            SendInput, {RShift up}
-            if ((A_TickCount - startTime) < 150) {
+            if (((A_TickCount - startTime) < 150) && A_PriorKey == "RShift") {
                 Send, {)}
             }
+            SendInput, {RShift up}
         }
     }
 Return
