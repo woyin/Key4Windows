@@ -1,80 +1,122 @@
-#SingleInstance force
+#Requires AutoHotkey v2.0
+#SingleInstance Force
 
-; Check if the icon file exists and set the tray icon if it does
+; 检查图标文件
 if FileExist("Retro_Mario.ico") {
-    MenuSetIcon("Retro_Mario.ico", 1)
+    TraySetIcon("Retro_Mario.ico")
 }
 
+; 全局变量
 global CLversion := "Copyright by Woyin"
-
-#Include A_ScriptDir "\lib\lib_functions.ahk"
-#Include A_ScriptDir "\lib\lib_KeysFunction.ahk"
-#Include A_ScriptDir "\lib\lib_macKeys.ahk"
-
-;-----------------START-----------------
-
-; Attempt to change left and right Shift keys to left parenthesis "(" and right parenthesis ")"
+global CapsLockToChangeInputMethod := 0
+global CapsLockStatus := 0
 global abc := false
 
-LShift::ShiftHandler("LShift", "{(}")
-RShift::ShiftHandler("RShift", "{)}")
+; 改变输入法状态的开关
+noNeedToChangeInputMethod() {
+    global CapsLockToChangeInputMethod := 0
+}
 
-ShiftHandler(shiftKey, output) {
-    KeyWait(shiftKey, "T0.01")
-    if (ErrorLevel) {
+; 实际使用的按键功能函数
+keyFunc_moveLeft() {
+    Send("{Left}")
+}
+
+keyFunc_moveRight() {
+    Send("{Right}")
+}
+
+keyFunc_moveUp() {
+    Send("{Up}")
+}
+
+keyFunc_moveDown() {
+    Send("{Down}")
+}
+
+keyFunc_delete() {
+    Send("{Delete}")
+}
+
+keyFunc_moveHome() {
+    Send("{Home}")
+}
+
+keyFunc_moveEnd() {
+    Send("{End}")
+}
+
+keyFunc_ditto() {
+    Send("^+!c")
+}
+
+; Mac风格快捷键
+!c::Send("^c")    ; 复制
+!x::Send("^x")    ; 剪切
+!v::Send("^v")    ; 粘贴
+!a::Send("^a")    ; 全选
+!z::Send("^z")    ; 撤销
+!y::Send("^y")    ; 重做
+!w::Send("^w")    ; 关闭标签
+!t::Send("^t")    ; 新建标签
+!f::Send("^f")    ; 查找
+!s::Send("^s")    ; 保存
+!b::Send("^b")    ; 粗体
+!i::Send("^i")    ; 斜体
+!q::Send("!{F4}") ; 关闭窗口
+
+; 左右Shift键改造
+LShift:: {
+    if !KeyWait("LShift", "T0.01") {  ; 如果按键没有在10ms内释放
         startTime := A_TickCount
-        while GetKeyState(shiftKey, "P") {
-            Send "{" shiftKey " down}"
-            KeyWait(shiftKey)
-            if ((A_TickCount - startTime < 150) && (A_PriorKey = shiftKey)) {
-                Send output
-            }
-            Send "{" shiftKey " up}"
+        while GetKeyState("LShift", "P") {
+            Send("{LShift Down}")
+            KeyWait("LShift")
+            if ((A_TickCount - startTime) < 150 && A_PriorKey = "LShift")
+                Send("(")
+            Send("{LShift Up}")
         }
     }
 }
 
-;-------程序解释------------------------
-; 该程序的逻辑与Mac上面的改变按键的逻辑不同
-; Autohotkey 无法真正意义上实现Capslock的组合键，所以用了两个变量来间接判断Capslock按键到底是被触发了一次，还是按住后与其他组合键一起使用
-; 判断是否触碰了一下就松开的通过KeyWait方法，对Capslock 点击松开进行判断，并通过SetTimer 来判断到底是按了一次还是长按，并调整相关的变量值
-;--------------------------------------
-
-global CapsLockToChangeInputMethod := false, CapsLockStatus := false
-
-CapsLock::CapsLockHandler()
-
-CapsLockHandler() {
-    global CapsLockToChangeInputMethod, CapsLockStatus
-
-    CapsLockToChangeInputMethod := true
-    CapsLockStatus := true
-    CapsLockHoldTime := 300
-    SetTimer(NoNeedToChangeInputMethod, CapsLockHoldTime, 1)
-
-    KeyWait("CapsLock")
-    CapsLockStatus := false
-    if CapsLockToChangeInputMethod {
-        Send "#{Space}"
-        CapsLockToChangeInputMethod := false
+RShift:: {
+    if !KeyWait("RShift", "T0.01") {  ; 如果按键没有在10ms内释放
+        startTime := A_TickCount
+        while GetKeyState("RShift", "P") {
+            Send("{RShift Down}")
+            KeyWait("RShift")
+            if ((A_TickCount - startTime) < 150 && A_PriorKey = "RShift")
+                Send(")")
+            Send("{RShift Up}")
+        }
     }
 }
 
-NoNeedToChangeInputMethod() {
-    global CapsLockToChangeInputMethod
-    CapsLockToChangeInputMethod := false
+; 禁用原始的CapsLock功能
+SetCapsLockState("AlwaysOff")
+
+; CapsLock处理
+*CapsLock:: {
+    global CapsLockToChangeInputMethod := 1
+    global CapsLockStatus := 1
+    SetTimer(noNeedToChangeInputMethod, 150)
+
+    KeyWait("CapsLock")
+    global CapsLockStatus := 0
+    if (CapsLockToChangeInputMethod) {
+        Send("{LWin down}{Space}{LWin up}")  
+        global CapsLockToChangeInputMethod := 0
+    }
 }
 
-;----------------------------keys-set-start-----------------------------
-#IF CapsLockStatus ; when CapsLock key is pressed and held
-
-a:: keyFunc_moveHome()
-b:: keyFunc_moveLeft()
-c:: keyFunc_ditto()
-d:: keyFunc_delete()
-e:: keyFunc_moveEnd()
-f:: keyFunc_moveRight()
-n:: keyFunc_moveDown()
-p:: keyFunc_moveUp()
-
-#IF
+; CapsLock组合键
+#HotIf GetKeyState("CapsLock", "P")
+a::keyFunc_moveHome()
+b::keyFunc_moveLeft()
+c::keyFunc_ditto()
+d::keyFunc_delete()
+e::keyFunc_moveEnd()
+f::keyFunc_moveRight()
+n::keyFunc_moveDown()
+p::keyFunc_moveUp()
+#HotIf

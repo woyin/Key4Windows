@@ -67,7 +67,7 @@ CapsLock::
     CapsLockToChangeInputMethod:=1 ;为是否切换输入法开关
     ; 默认CapsLock（系统变量）的值为1，即大小写打开（但后续会关闭）
     CapsLockStatus:=1 
-    CapsLockHoldTime:=300 ;阈值300ms，只要按住的时间不超过300ms，就不会触发下面的定时器
+    CapsLockHoldTime:=150 ;阈值300ms，只要按住的时间不超过300ms，就不会触发下面的定时器
     ; 同时设置一个定时器，只要按键时间超过阈值，则翻转默认逻辑，即CapsLock成为修饰符而非修改输入法 
     SetTimer, noNeedToChangeInputMethod, % CapsLockHoldTime
 
