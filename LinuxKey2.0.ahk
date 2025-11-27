@@ -29,10 +29,43 @@ ResetInputMethodFlag() {
     global CapsLockToChangeInputMethod := 0
 }
 
-; Show tooltip helper
-ShowTip(text, duration := 1000) {
-    ToolTip text
-    SetTimer () => ToolTip(), -duration
+; Show styled tooltip helper
+ShowStyledTip(text, duration := 1000) {
+    static MyGui := ""
+    
+    ; Destroy previous GUI if it exists
+    if (MyGui) {
+        try MyGui.Destroy()
+    }
+    
+    MyGui := Gui("+AlwaysOnTop -Caption +ToolWindow +LastFound +Owner")
+    MyGui.MarginX := 10
+    MyGui.MarginY := 5
+    MyGui.BackColor := "Red"
+    MyGui.SetFont("cWhite s10 w700", "Segoe UI")
+    MyGui.Add("Text",, text)
+    
+    ; Calculate position
+    try {
+        if CaretGetPos(&x, &y) {
+            ; Show near caret (slightly below)
+            x += 10
+            y += 20
+        } else {
+            ; Fallback to mouse position
+            MouseGetPos(&x, &y)
+            x += 20
+            y += 20
+        }
+    } catch {
+        ; Fallback if something fails
+        MouseGetPos(&x, &y)
+    }
+    
+    MyGui.Show("x" x " y" y " NoActivate")
+    
+    ; Auto-hide
+    SetTimer () => (MyGui ? (MyGui.Destroy(), MyGui := "") : ""), -duration
 }
 
 ; Check if current app is excluded
@@ -54,53 +87,58 @@ IsExcludedApp() {
 
 #HotIf !IsExcludedApp()
 
+; ------------------------------------------------------------------------------
+; Core Logic: CapsLock
+; ------------------------------------------------------------------------------
+
 ; Disable default CapsLock toggle
 SetCapsLockState("AlwaysOff")
 
+; Record start time on press
 *CapsLock:: {
-    global CapsLockToChangeInputMethod := 1
-    global CapsLockStatus := 1
+    global CapsLockStartTime := A_TickCount
+}
+
+; Handle action on release
+*CapsLock Up:: {
+    ; Calculate duration
+    duration := A_TickCount - CapsLockStartTime
     
-    ; Set a timer to disable "Input Method Switch" intent if held too long
-    SetTimer(ResetInputMethodFlag, -HoldTimeout) 
-    
-    KeyWait("CapsLock")
-    
-    global CapsLockStatus := 0
-    
-    ; If the flag is still true (released quickly), switch input method
-    if (CapsLockToChangeInputMethod) {
+    ; If released quickly AND no other key was pressed in between
+    if (duration < HoldTimeout && A_PriorKey = "CapsLock") {
         Send("{LWin down}{Space}{LWin up}")
-        ShowTip("Input Method Switched", 500)
-        global CapsLockToChangeInputMethod := 0
+        ShowStyledTip("Input Method Switched", 500)
     }
 }
 
-LShift:: {
-    if (KeyWait("LShift", "T" . HoldTimeout / 1000)) { 
-        ; Released quickly
-        if (A_PriorKey = "LShift") {
-            Send("{(}")
-        }
-    } else {
-        ; Held longer than timeout, act as normal Shift
-        Send("{LShift Down}")
-        KeyWait("LShift")
-        Send("{LShift Up}")
+; ------------------------------------------------------------------------------
+; Core Logic: Shift Parentheses
+; ------------------------------------------------------------------------------
+
+; Use pass-through (~) to ensure Shift works instantly as a modifier for other keys
+~LShift:: {
+    global LShiftStartTime := A_TickCount
+}
+
+~LShift Up:: {
+    duration := A_TickCount - LShiftStartTime
+    
+    ; If released quickly AND no other key was pressed
+    if (duration < HoldTimeout && A_PriorKey = "LShift") {
+        Send("{(}")
     }
 }
 
-RShift:: {
-    if (KeyWait("RShift", "T" . HoldTimeout / 1000)) {
-        ; Released quickly
-        if (A_PriorKey = "RShift") {
-            Send("{)}")
-        }
-    } else {
-        ; Held longer than timeout, act as normal Shift
-        Send("{RShift Down}")
-        KeyWait("RShift")
-        Send("{RShift Up}")
+~RShift:: {
+    global RShiftStartTime := A_TickCount
+}
+
+~RShift Up:: {
+    duration := A_TickCount - RShiftStartTime
+    
+    ; If released quickly AND no other key was pressed
+    if (duration < HoldTimeout && A_PriorKey = "RShift") {
+        Send("{)}")
     }
 }
 
