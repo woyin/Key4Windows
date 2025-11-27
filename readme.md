@@ -1,46 +1,82 @@
-将原先[CapsLock+](http://cjkis.me/capslock+/) 代码进行了简化，并删除了大量不需要的文件，并大量精简了重复的内容，同步添加了部分注释。
-本库的目的就是为了在Windows中实现Linux 下的Ctrl的常见组合键，实现上下左右功能，这对那些60%键盘的用户尤为实用。
-其他源库的内容已经被我删除，因为是真的不需要，其实现的功能已经有更好的软件取代。
+# LinuxKey 2.0
 
+这是一个基于 AutoHotkey v2 的 Windows 键盘增强工具，旨在为 Windows 用户提供类似 Linux/macOS 的高效键盘体验。特别适合 60% 键盘用户和开发者。
 
-## 1.怎么运行LinuxKey的源码？
-1. 下载 [AutoHotkey](http://www.ahkscript.org/)，并安装。
-2. 从 GitHub 下载源码。
-3. 运行`LinuxKey.ahk`。
+## ✨ 核心功能
 
-## 2.能不能在XXX快捷键上实现XXX功能？
+### 1. CapsLock 增强
+*   **短按**：切换输入法（发送 `Win+Space`），并在光标处显示**红底白字**的提示。
+*   **长按（作为修饰键）**：
+    *   **光标移动**：
+        *   `CapsLock + P / N`：上 / 下
+        *   `CapsLock + B / F`：左 / 右
+        *   `CapsLock + A / E`：行首 (Home) / 行尾 (End)
+    *   **编辑**：
+        *   `CapsLock + D`：删除 (Delete)
+        *   `CapsLock + C`：调用 Ditto 剪贴板 (Ctrl+Shift+Alt+C)
+    *   **鼠标控制**（🆕 新功能）：
+        *   `CapsLock + I / K`：鼠标上移 / 下移
+        *   `CapsLock + J / L`：鼠标左移 / 右移
+        *   `CapsLock + U`：鼠标左键单击
+        *   `CapsLock + O`：鼠标右键单击
 
-```ahk
-/*
-不打算修改程序本身，只想为某个按键实现功能的话，可以在这里：
-1. 在lib/lib_keysFunction.ahk 添加 keyfunc_xxxx() 的函数，
-2. 在 settings.ini [keys]下添加设置，
-例如按下面这样写，然后添加设置：caps_f7=keyFunc_test2(apple)
-3. 保存，重载 capslock+ (capslock+F5)
-4. 按下 capslock+F7 试试
-************************************************/
-keyfunc_test2(str){
-  msgbox, % str
-  return
-}
+### 2. Shift 增强
+*   **短按**：
+    *   `左 Shift`：输入 `(`
+    *   `右 Shift`：输入 `)`
+*   **长按 / 组合键**：保持原始 Shift 功能（无延迟，瞬间响应）。
+
+### 3. macOS 风格快捷键
+使用 `Alt` 键模拟 macOS 的 `Command` 键，让 Windows 操作更符合直觉：
+
+*   **常用命令**：
+    *   `Alt + C / V / X`：复制 / 粘贴 / 剪切
+    *   `Alt + Z / Y`：撤销 / 重做
+    *   `Alt + A`：全选
+    *   `Alt + S`：保存
+    *   `Alt + F`：查找
+    *   `Alt + N`：新建窗口
+    *   `Alt + O`：打开文件
+    *   `Alt + P`：打印
+    *   `Alt + W`：关闭标签页
+    *   `Alt + Q`：关闭窗口 (Alt+F4)
+    *   `Alt + H / M`：最小化窗口
+*   **文本导航**：
+    *   `Alt + ← / →`：行首 / 行尾
+    *   `Alt + ↑ / ↓`：文档顶部 / 底部
+*   **编辑**：
+    *   `Alt + Backspace`：删除至行首
+    *   `Alt + /`：注释代码 (Ctrl+/)
+
+## ⚙️ 配置说明
+
+在脚本同目录下会自动生成 `settings.ini` 文件，你可以修改以下配置：
+
+```ini
+[General]
+; 长按判定时间 (毫秒)，默认 150ms
+HoldTimeout=150
+; 鼠标移动速度，默认 10
+MouseSpeed=10
+
+[ExcludedApps]
+; 黑名单程序（逗号分隔），在这些程序中脚本会自动失效
+; 例如：玩游戏时禁用
+ProcessNames=csgo.exe,overwatch.exe,valorant.exe
 ```
 
-*为了避免按键设置会调到内部函数，所以规定了所有函数以`keyfunc_`开头
+## 🚀 安装与运行
 
-具体要实现什么功能，就去学下 AutoHotkey 咯，很快上手的。
+1.  确保已安装 [AutoHotkey v2](https://www.autohotkey.com/v2/)。
+2.  下载本项目。
+3.  双击运行 `LinuxKey2.0.ahk`。
 
-## 3.那你原有的功能我想改怎么改？
-`LinuxKey.ahk`是入口文件，其他所有依赖文件都扔`/lib`里了，各文件说明如下：
+## 📝 更新日志 (v2.0)
 
-|文件|说明|
-|:---|:---|
-|lib_functions.ahk|一些依赖函数|
-|lib_init.ahk|各种初始化从这里开始|
-|lib_json.ahk|json库|
-|lib_keysFunction.ahk|几乎所有按键功能都在这实现|
-|lib_language.ahk|程序用到的字符串放到这|
-|lib_loadAnimation.ahk|程序加载动画|
-|lib_settings.ahk|Capslock+settings.ini设置项提取|
-|lib_ydTrans.ahk|翻译|
-
-
+*   **重构**：代码全面升级至 AHK v2，逻辑更清晰。
+*   **性能**：重写 Shift 和 CapsLock 逻辑，消除输入延迟，响应极快。
+*   **新功能**：
+    *   新增鼠标模拟功能。
+    *   新增大量 macOS 风格快捷键。
+    *   新增输入法切换视觉提示（跟随光标）。
+    *   新增配置文件 (`settings.ini`) 和黑名单功能。

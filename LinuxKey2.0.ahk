@@ -174,18 +174,40 @@ o::Click "Right"
 
 #HotIf !IsExcludedApp()
 
+; File & Application
+!n::Send "^n"    ; New Window
+!o::Send "^o"    ; Open
+!p::Send "^p"    ; Print
+!r::Send "^r"    ; Refresh
+!h::WinMinimize "A" ; Hide/Minimize Window (Cmd+H/M style)
+!m::WinMinimize "A" ; Minimize
+
+; Editing
 !c::Send "^c"    ; Copy
 !x::Send "^x"    ; Cut
 !v::Send "^v"    ; Paste
 !a::Send "^a"    ; Select All
 !z::Send "^z"    ; Undo
 !y::Send "^y"    ; Redo
-!w::Send "^w"    ; Close Tab
-!t::Send "^t"    ; New Tab
 !f::Send "^f"    ; Find
 !s::Send "^s"    ; Save
 !b::Send "^b"    ; Bold
 !i::Send "^i"    ; Italic
-!q::Send "!{F4}" ; Close Window
+!u::Send "^u"    ; Underline
+!/::Send "^/"    ; Comment (common in IDEs)
+
+; Tabs & Windows
+!w::Send "^w"    ; Close Tab
+!t::Send "^t"    ; New Tab
+!q::Send "!{F4}" ; Close Window (Quit)
+
+; Navigation (Cmd+Arrows -> Home/End/Top/Bottom)
+!Left::Send "{Home}"
+!Right::Send "{End}"
+!Up::Send "^{Home}"
+!Down::Send "^{End}"
+
+; Text Deletion (Cmd+Backspace -> Delete Line/to beginning)
+!BackSpace::Send "+{Home}{Delete}" 
 
 #HotIf
