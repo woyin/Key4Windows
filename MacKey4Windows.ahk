@@ -4,7 +4,7 @@
 ; ------------------------------------------------------------------------------
 ; Global Variables & Configuration
 ; ------------------------------------------------------------------------------
-IconFile := "Retro_Mario.ico"
+IconFile := "assets\Retro_Mario.ico"
 if FileExist(IconFile) {
     TraySetIcon(IconFile)
 }
@@ -201,7 +201,7 @@ SetupTrayMenu() {
 }
 
 ShowSettingsGUI() {
-    myGui := Gui("+AlwaysOnTop", "Key4Windows Settings")
+    myGui := Gui("+AlwaysOnTop", "MacKey4Windows Settings")
     myGui.SetFont("s10", "Segoe UI")
     
     tabs := myGui.Add("Tab3", "w550 h450", ["General", "CapsLock Keys", "Global Keys", "Excluded Apps"])
