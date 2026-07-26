@@ -562,7 +562,7 @@ SaveAndReload(guiObj) {
 ; Helper Functions (UI Feedback)
 ; ------------------------------------------------------------------------------
 
-; #3 - Fixed ShowStyledTip closure to avoid stale reference issues
+; #3 - ShowStyledTip with static variable for timer closure
 ShowStyledTip(text, duration := 1000) {
     static TipGui := ""
     if (TipGui) {
@@ -590,10 +590,7 @@ ShowStyledTip(text, duration := 1000) {
     }
     
     TipGui.Show("x" x " y" y " NoActivate")
-    
-    ; Capture a local reference for the timer closure
-    local guiRef := TipGui
-    SetTimer () => (guiRef ? (guiRef.Destroy(), guiRef := "") : ""), -duration
+    SetTimer () => (TipGui ? (TipGui.Destroy(), TipGui := "") : ""), -duration
 }
 
 ; ------------------------------------------------------------------------------
