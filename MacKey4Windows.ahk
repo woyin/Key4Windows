@@ -15,9 +15,18 @@ Config["HoldTimeout"] := 150
 Config["MouseSpeed"] := 10
 Config["MouseAcceleration"] := 1.1
 Config["MaxMouseSpeed"] := 50
+Config["MouseInterval"] := 20
 Config["ExcludedApps"] := Map()
 Config["Keys"] := Map()
 Config["GlobalKeys"] := Map()
+
+; Default values for Reset to Defaults (#11)
+global DefaultConfig := Map()
+DefaultConfig["HoldTimeout"] := 150
+DefaultConfig["MouseSpeed"] := 10
+DefaultConfig["MouseAcceleration"] := 1.1
+DefaultConfig["MaxMouseSpeed"] := 50
+DefaultConfig["MouseInterval"] := 20
 
 ; Action Mappings (Action Name -> Function)
 global Actions := Map()
@@ -37,6 +46,26 @@ Actions["MouseClickLeft"] := (*) => Click("Left")
 Actions["MouseClickRight"] := (*) => Click("Right")
 Actions["WinMinimize"] := (*) => WinMinimize("A")
 
+; #6 - Shift Selection Mode Actions
+Actions["SelectUp"] := (*) => Send("+{Up}")
+Actions["SelectDown"] := (*) => Send("+{Down}")
+Actions["SelectLeft"] := (*) => Send("+{Left}")
+Actions["SelectRight"] := (*) => Send("+{Right}")
+Actions["SelectHome"] := (*) => Send("+{Home}")
+Actions["SelectEnd"] := (*) => Send("+{End}")
+
+; #7 - Word-level Movement Actions
+Actions["WordLeft"] := (*) => Send("^{Left}")
+Actions["WordRight"] := (*) => Send("^{Right}")
+Actions["SelectWordLeft"] := (*) => Send("^+{Left}")
+Actions["SelectWordRight"] := (*) => Send("^+{Right}")
+Actions["DeleteWord"] := (*) => Send("^{Delete}")
+Actions["BackspaceWord"] := (*) => Send("^{Backspace}")
+
+; #8 - Page Up/Down Actions
+Actions["PageUp"] := (*) => Send("{PgUp}")
+Actions["PageDown"] := (*) => Send("{PgDn}")
+
 ; File Paths
 global IniFilePath := A_ScriptDir "\settings.ini"
 
@@ -44,6 +73,10 @@ global IniFilePath := A_ScriptDir "\settings.ini"
 global CapsLockStartTime := 0
 global LShiftStartTime := 0
 global RShiftStartTime := 0
+
+; #4 - IsExcludedApp HWND Cache
+global CachedIsExcluded := false
+global CachedHwnd := 0
 
 ; ------------------------------------------------------------------------------
 ; Initialization
@@ -58,11 +91,12 @@ SetupHotkeys()
 LoadConfiguration() {
     global Config
     
-    ; General
-    Config["HoldTimeout"] := IniRead(IniFilePath, "General", "HoldTimeout", 150)
-    Config["MouseSpeed"] := IniRead(IniFilePath, "General", "MouseSpeed", 10)
-    Config["MouseAcceleration"] := IniRead(IniFilePath, "General", "MouseAcceleration", 1.1)
-    Config["MaxMouseSpeed"] := IniRead(IniFilePath, "General", "MaxMouseSpeed", 50)
+    ; General - #14: Config value validation with type checking and clamping
+    Config["HoldTimeout"] := ClampInt(IniRead(IniFilePath, "General", "HoldTimeout", 150), 50, 1000)
+    Config["MouseSpeed"] := ClampInt(IniRead(IniFilePath, "General", "MouseSpeed", 10), 1, 100)
+    Config["MouseAcceleration"] := ClampFloat(IniRead(IniFilePath, "General", "MouseAcceleration", 1.1), 1.0, 3.0)
+    Config["MaxMouseSpeed"] := ClampInt(IniRead(IniFilePath, "General", "MaxMouseSpeed", 50), 5, 200)
+    Config["MouseInterval"] := ClampInt(IniRead(IniFilePath, "General", "MouseInterval", 20), 5, 100)
     
     ; Excluded Apps
     rawExcluded := IniRead(IniFilePath, "ExcludedApps", "ProcessNames", "")
@@ -77,6 +111,25 @@ LoadConfiguration() {
     
     ; Global Keys
     LoadKeysSection("GlobalKeys", Config["GlobalKeys"])
+}
+
+; #14 - Validation helpers
+ClampInt(val, minVal, maxVal) {
+    try {
+        n := Integer(val)
+    } catch {
+        n := minVal
+    }
+    return Max(minVal, Min(maxVal, n))
+}
+
+ClampFloat(val, minVal, maxVal) {
+    try {
+        n := Float(val)
+    } catch {
+        n := minVal
+    }
+    return Max(minVal, Min(maxVal, n))
 }
 
 LoadKeysSection(sectionName, targetMap) {
@@ -106,6 +159,7 @@ SaveConfiguration() {
     IniWrite(Config["MouseSpeed"], IniFilePath, "General", "MouseSpeed")
     IniWrite(Config["MouseAcceleration"], IniFilePath, "General", "MouseAcceleration")
     IniWrite(Config["MaxMouseSpeed"], IniFilePath, "General", "MaxMouseSpeed")
+    IniWrite(Config["MouseInterval"], IniFilePath, "General", "MouseInterval")
     
     ; Excluded Apps
     excludedStr := ""
@@ -143,6 +197,7 @@ SetupHotkeys() {
     HotIf ; Turn off context
 }
 
+; #1 - Fixed: silent catch now logs errors via OutputDebug
 RegisterMapKeys(keyMap) {
     for key, actionName in keyMap {
         if (key = "")
@@ -155,7 +210,7 @@ RegisterMapKeys(keyMap) {
                 Hotkey key, ((str) => (*) => Send(str))(actionName), "On"
             }
         } catch as err {
-            ; Apply
+            OutputDebug("⚠ Failed to register hotkey '" key "' -> '" actionName "': " err.Message)
         }
     }
 }
@@ -163,19 +218,28 @@ RegisterMapKeys(keyMap) {
 ; ------------------------------------------------------------------------------
 ; Logic Functions
 ; ------------------------------------------------------------------------------
+
+; #4 - IsExcludedApp with HWND caching for performance
 IsExcludedApp() {
+    global CachedIsExcluded, CachedHwnd
     try {
+        hwnd := WinGetID("A")
+        if (hwnd = CachedHwnd)
+            return CachedIsExcluded
+        CachedHwnd := hwnd
         procName := WinGetProcessName("A")
-        if Config["ExcludedApps"].Has(procName)
-            return true
+        CachedIsExcluded := Config["ExcludedApps"].Has(procName)
+        return CachedIsExcluded
     }
     return false
 }
 
+; #5 - Mouse interval now uses Config["MouseInterval"] instead of hardcoded 20
 StartMouseMovement(dx, dy) {
     currentSpeed := Config["MouseSpeed"]
     acceleration := Config["MouseAcceleration"]
     maxSpeed := Config["MaxMouseSpeed"]
+    interval := Config["MouseInterval"]
     
     while GetKeyState(A_ThisHotkey, "P") {
         MouseMove(dx * currentSpeed, dy * currentSpeed, 0, "R")
@@ -185,26 +249,42 @@ StartMouseMovement(dx, dy) {
         if (currentSpeed > maxSpeed)
             currentSpeed := maxSpeed
             
-        Sleep 20
+        Sleep interval
     }
 }
 
 ; ------------------------------------------------------------------------------
 ; GUI & Menu
 ; ------------------------------------------------------------------------------
+
+; #9 - Tray menu with Pause/Resume toggle
 SetupTrayMenu() {
     Tray := A_TrayMenu
     Tray.Delete() ; Clear default
     Tray.Add("Settings", (*) => ShowSettingsGUI())
+    Tray.Add("Pause", TogglePause)
+    Tray.Add()  ; Separator
     Tray.Add("Reload", (*) => Reload())
     Tray.Add("Exit", (*) => ExitApp())
 }
 
+TogglePause(*) {
+    Suspend(-1)  ; Toggle suspend state
+    if A_IsSuspended {
+        A_TrayMenu.Rename("Pause", "Resume")
+        ShowStyledTip("⏸ Paused", 800)
+    } else {
+        A_TrayMenu.Rename("Resume", "Pause")
+        ShowStyledTip("▶ Resumed", 800)
+    }
+}
+
 ShowSettingsGUI() {
-    myGui := Gui("+AlwaysOnTop", "MacKey4Windows Settings")
+    ; #10 - DPI scaling support
+    myGui := Gui("+AlwaysOnTop +Resize", "MacKey4Windows Settings")
     myGui.SetFont("s10", "Segoe UI")
     
-    tabs := myGui.Add("Tab3", "w550 h450", ["General", "CapsLock Keys", "Global Keys", "Excluded Apps"])
+    tabs := myGui.Add("Tab3", "w550 h480", ["General", "CapsLock Keys", "Global Keys", "Excluded Apps"])
     
     ; --- General Tab ---
     tabs.UseTab("General")
@@ -218,6 +298,16 @@ ShowSettingsGUI() {
     myGui.Add("Text", "xs Section", "Mouse Acceleration:")
     myGui.Add("Edit", "ys w100 vMouseAccel", Config["MouseAcceleration"])
 
+    ; #2 - MaxMouseSpeed now exposed in GUI
+    myGui.Add("Text", "xs Section", "Max Mouse Speed:")
+    myGui.Add("Edit", "ys w100 vMaxMouseSpeed", Config["MaxMouseSpeed"])
+
+    ; #5 - Mouse Interval exposed in GUI
+    myGui.Add("Text", "xs Section", "Mouse Interval (ms):")
+    myGui.Add("Edit", "ys w100 vMouseInterval", Config["MouseInterval"])
+
+    ; #11 - Reset to Defaults button in General tab
+    myGui.Add("Button", "xs Section w120", "Reset to Defaults").OnEvent("Click", (*) => ResetGeneralDefaults(myGui))
     
     ; --- CapsLock Keys Tab ---
     tabs.UseTab("CapsLock Keys")
@@ -272,11 +362,57 @@ ShowSettingsGUI() {
 
     ; --- Footer ---
     tabs.UseTab()
-    ; Place buttons below the Tab control (Height 450)
-    myGui.Add("Button", "xm y470 w80", "Save").OnEvent("Click", (*) => SaveAndReload(myGui))
+    ; Place buttons below the Tab control
+    myGui.Add("Button", "xm y500 w80", "Save").OnEvent("Click", (*) => SaveAndReload(myGui))
     myGui.Add("Button", "x+20 w80", "Cancel").OnEvent("Click", (*) => myGui.Destroy())
     
+    ; #12 - Export / Import buttons
+    myGui.Add("Button", "x+40 w80", "Export").OnEvent("Click", (*) => ExportConfig())
+    myGui.Add("Button", "x+10 w80", "Import").OnEvent("Click", (*) => ImportConfig())
+    
     myGui.Show()
+}
+
+; #11 - Reset General settings to default values
+ResetGeneralDefaults(guiObj) {
+    result := MsgBox("Reset all General settings to defaults?", "Confirm Reset", "YesNo Icon!")
+    if (result = "Yes") {
+        guiObj["HoldTimeout"].Value := DefaultConfig["HoldTimeout"]
+        guiObj["MouseSpeed"].Value := DefaultConfig["MouseSpeed"]
+        guiObj["MouseAccel"].Value := DefaultConfig["MouseAcceleration"]
+        guiObj["MaxMouseSpeed"].Value := DefaultConfig["MaxMouseSpeed"]
+        guiObj["MouseInterval"].Value := DefaultConfig["MouseInterval"]
+    }
+}
+
+; #12 - Export configuration to a user-chosen file
+ExportConfig() {
+    targetFile := FileSelect("S16", A_ScriptDir "\settings_backup.ini", "Export Configuration", "INI Files (*.ini)")
+    if (targetFile = "")
+        return
+    try {
+        FileCopy(IniFilePath, targetFile, true)
+        MsgBox("Configuration exported to:`n" targetFile, "Export Successful", "Iconi")
+    } catch as err {
+        MsgBox("Export failed: " err.Message, "Error", "Icon!")
+    }
+}
+
+; #12 - Import configuration from a user-chosen file
+ImportConfig() {
+    sourceFile := FileSelect(1, A_ScriptDir, "Import Configuration", "INI Files (*.ini)")
+    if (sourceFile = "")
+        return
+    result := MsgBox("Import will overwrite current settings and reload.`nContinue?", "Confirm Import", "YesNo Icon!")
+    if (result = "Yes") {
+        try {
+            FileCopy(sourceFile, IniFilePath, true)
+            MsgBox("Configuration imported. Script will now reload.", "Import Successful", "Iconi")
+            Reload()
+        } catch as err {
+            MsgBox("Import failed: " err.Message, "Error", "Icon!")
+        }
+    }
 }
 
 PopulateListView(lv, mapData, isCapsLock) {
@@ -286,24 +422,22 @@ PopulateListView(lv, mapData, isCapsLock) {
     }
 }
 
+; #13 - Simplified FormatKeyForDisplay using character-by-character parsing
 FormatKeyForDisplay(key, isCapsLock) {
-    display := key
-    ; Use placeholders to avoid recursive replacement of "+"
-    display := StrReplace(display, "^", "{Ctrl}")
-    display := StrReplace(display, "!", "{Alt}")
-    display := StrReplace(display, "+", "{Shift}")
-    display := StrReplace(display, "#", "{Win}")
-    
-    ; Convert placeholders to final format
-    display := StrReplace(display, "{Ctrl}", "Ctrl + ")
-    display := StrReplace(display, "{Alt}", "Alt + ")
-    display := StrReplace(display, "{Shift}", "Shift + ")
-    display := StrReplace(display, "{Win}", "Win + ")
-    
-    if (isCapsLock)
-        display := "CapsLock + " . display
-        
-    return display
+    static modifiers := Map(
+        "^", "Ctrl + ",
+        "!", "Alt + ",
+        "+", "Shift + ",
+        "#", "Win + "
+    )
+    display := ""
+    Loop Parse, key {
+        if modifiers.Has(A_LoopField)
+            display .= modifiers[A_LoopField]
+        else
+            display .= A_LoopField
+    }
+    return (isCapsLock ? "CapsLock + " : "") . display
 }
 
 EditMappingKey(lv, parentGui, isCapsLock) {
@@ -381,13 +515,16 @@ RemoveProcess(lv) {
         lv.Delete(row)
 }
 
+; #2 - SaveAndReload now includes MaxMouseSpeed and MouseInterval
 SaveAndReload(guiObj) {
     saved := guiObj.Submit()
     
-    ; Update Config Global
-    Config["HoldTimeout"] := saved.HoldTimeout
-    Config["MouseSpeed"] := saved.MouseSpeed
-    Config["MouseAcceleration"] := saved.MouseAccel
+    ; Update Config Global - #14: validate on save
+    Config["HoldTimeout"] := ClampInt(saved.HoldTimeout, 50, 1000)
+    Config["MouseSpeed"] := ClampInt(saved.MouseSpeed, 1, 100)
+    Config["MouseAcceleration"] := ClampFloat(saved.MouseAccel, 1.0, 3.0)
+    Config["MaxMouseSpeed"] := ClampInt(saved.MaxMouseSpeed, 5, 200)
+    Config["MouseInterval"] := ClampInt(saved.MouseInterval, 5, 100)
     
     ; Update Excluded Apps
     Config["ExcludedApps"].Clear()
@@ -424,17 +561,20 @@ SaveAndReload(guiObj) {
 ; ------------------------------------------------------------------------------
 ; Helper Functions (UI Feedback)
 ; ------------------------------------------------------------------------------
+
+; #3 - Fixed ShowStyledTip closure to avoid stale reference issues
 ShowStyledTip(text, duration := 1000) {
-    static MyGui := ""
-    if (MyGui) {
-        try MyGui.Destroy()
+    static TipGui := ""
+    if (TipGui) {
+        try TipGui.Destroy()
+        TipGui := ""
     }
-    MyGui := Gui("+AlwaysOnTop -Caption +ToolWindow +LastFound +Owner")
-    MyGui.BackColor := "Red"
-    MyGui.SetFont("cWhite s10 w700", "Segoe UI")
-    MyGui.MarginX := 10
-    MyGui.MarginY := 5
-    MyGui.Add("Text",, text)
+    TipGui := Gui("+AlwaysOnTop -Caption +ToolWindow +LastFound +Owner")
+    TipGui.BackColor := "Red"
+    TipGui.SetFont("cWhite s10 w700", "Segoe UI")
+    TipGui.MarginX := 10
+    TipGui.MarginY := 5
+    TipGui.Add("Text",, text)
     
     try {
         if CaretGetPos(&x, &y) {
@@ -449,8 +589,11 @@ ShowStyledTip(text, duration := 1000) {
         MouseGetPos(&x, &y)
     }
     
-    MyGui.Show("x" x " y" y " NoActivate")
-    SetTimer () => (MyGui ? (MyGui.Destroy(), MyGui := "") : ""), -duration
+    TipGui.Show("x" x " y" y " NoActivate")
+    
+    ; Capture a local reference for the timer closure
+    local guiRef := TipGui
+    SetTimer () => (guiRef ? (guiRef.Destroy(), guiRef := "") : ""), -duration
 }
 
 ; ------------------------------------------------------------------------------
