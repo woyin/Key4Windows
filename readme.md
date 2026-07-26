@@ -5,44 +5,94 @@ MacKey4Windows is a powerful AutoHotkey script designed to bring **macOS-style s
 ## Features
 
 ### 🚀 Core Features
-*   **MacOS Shortcuts**: Seamlessly use `Alt+C` (Copy), `Alt+V` (Paste), `Alt+W` (Close Tab) and more on Windows.
-*   **CapsLock Navigation**: Press and hold `CapsLock` to activate a navigation layer (Vim-style `H/J/K/L` or custom).
+*   **Full macOS Shortcuts**: Seamlessly use `Alt` as `Cmd` — `Alt+C` (Copy), `Alt+V` (Paste), `Alt+W` (Close Tab), `Alt+Q` (Quit) and **50+ more**.
+*   **CapsLock Navigation**: Press and hold `CapsLock` to activate a navigation layer (Emacs-style `P/N/B/F` + Word/Page movement).
 *   **Mouse Control**: Control the mouse cursor with your keyboard, featuring **Smart Acceleration**.
 
-### ✨ New in v3.0
-*   **Graphical Settings UI**: Right-click the tray icon to easily configure everything.
-*   **Dynamic Hotkeys**: Remap any key binding without touching the code.
-*   **Global Keys Manager**: Manage your global shortcuts (like `Alt+Key` mappings) directly in the UI.
-*   **Process Exclusion**: easily disable hotkeys in specific games or apps (e.g., CS:GO).
+### ✨ Shortcut Categories
 
-### 🆕 New in v3.1
-*   **Shift Selection Mode**: `CapsLock` layer actions for selecting text (`SelectUp`, `SelectDown`, `SelectLeft`, `SelectRight`, `SelectHome`, `SelectEnd`).
-*   **Word-level Navigation**: Jump by word (`CapsLock+W/Q`) and delete by word (`DeleteWord`, `BackspaceWord`).
-*   **Page Navigation**: `PageUp` and `PageDown` actions available in the CapsLock layer.
-*   **Pause/Resume**: Quickly toggle all hotkeys on/off from the tray menu.
-*   **Export/Import Config**: Backup and restore your `settings.ini` via the GUI.
-*   **Reset to Defaults**: One-click reset for General settings in the GUI.
-*   **Performance**: HWND-cached `IsExcludedApp()` for reduced system calls.
-*   **Validation**: All config values are type-checked and clamped to safe ranges.
-*   **DPI Aware**: Settings window scales correctly on high-DPI displays.
+#### Cmd (Alt) → Ctrl Mappings
+| Shortcut | Action | Shortcut | Action |
+|---|---|---|---|
+| `Alt+C` | Copy | `Alt+V` | Paste |
+| `Alt+X` | Cut | `Alt+A` | Select All |
+| `Alt+Z` | Undo | `Alt+Y` | Redo |
+| `Alt+S` | Save | `Alt+F` | Find |
+| `Alt+N` | New | `Alt+O` | Open |
+| `Alt+P` | Print | `Alt+W` | Close Tab |
+| `Alt+T` | New Tab | `Alt+Q` | Quit (Alt+F4) |
+| `Alt+L` | Address Bar | `Alt+K` | Quick Action |
+| `Alt+D` | Bookmark | `Alt+G` | Find Next |
+| `Alt+J` | Downloads | `Alt+R` | Refresh |
+| `Alt+B` | Bold | `Alt+I` | Italic |
+| `Alt+U` | Underline | `Alt+/` | Comment |
+| `Alt+H` | Minimize | `Alt+M` | Minimize |
+| `Alt+E` | Use for Find | | |
+
+#### Cmd+Shift (Alt+Shift) Mappings
+| Shortcut | Action |
+|---|---|
+| `Alt+Shift+Z` | Redo (macOS style) |
+| `Alt+Shift+S` | Save As |
+| `Alt+Shift+T` | Reopen Closed Tab |
+| `Alt+Shift+N` | New Window / Incognito |
+| `Alt+Shift+V` | Paste as Plain Text |
+| `Alt+Shift+F` | Find in Files |
+| `Alt+Shift+P` | Command Palette (VS Code) |
+| `Alt+Shift+E` | Explorer Sidebar (VS Code) |
+
+#### Text Navigation & Selection
+| Shortcut | Action |
+|---|---|
+| `Alt+Left/Right` | Line Start / End |
+| `Alt+Up/Down` | Document Start / End |
+| `Alt+Backspace` | Delete to Line Start |
+| `Alt+Shift+Left/Right` | Select to Line Start / End |
+| `Alt+Shift+Up/Down` | Select to Document Start / End |
+
+#### Tab & Zoom Management
+| Shortcut | Action |
+|---|---|
+| `Alt+1~9` | Switch to Tab 1-9 |
+| `Alt+0` | Reset Zoom |
+| `Alt+=` | Zoom In |
+| `Alt+-` | Zoom Out |
+| `Alt+[` | Browser Back |
+| `Alt+]` | Browser Forward |
+
+#### Screenshots
+| Shortcut | Action |
+|---|---|
+| `Alt+Shift+3` | Full Screen Screenshot |
+| `Alt+Shift+4/5` | Snip & Sketch (Win+Shift+S) |
+
+### 🎹 CapsLock Navigation Layer
+Hold `CapsLock` to activate:
+
+| Key | Action | Key | Action |
+|---|---|---|---|
+| `P/N` | Up / Down | `B/F` | Left / Right |
+| `A/E` | Line Start / End | `D` | Delete |
+| `H` | Kill Line (to end) | `X` | Backspace |
+| `T` | Transpose Chars | `W/Q` | Word Right / Left |
+| `V` | Page Down | `C` | Clipboard History |
+| `I/K/J/L` | Mouse ↑↓←→ | `U/O` | Mouse Click L/R |
+
+**CapsLock Tap** = Switch Input Method
+
+### ⚙️ Settings & Management
+*   **Graphical Settings UI**: Right-click the tray icon → `Settings`.
+*   **Dynamic Hotkeys**: Remap any key binding without touching the code.
+*   **Pause/Resume**: Toggle all hotkeys from the tray menu.
+*   **Export/Import**: Backup and restore configuration.
+*   **Process Exclusion**: Disable hotkeys in specific apps.
+*   **Reset to Defaults**: One-click reset for General settings.
 
 ## Usage
 
 1.  Download and install [AutoHotkey v2](https://www.autohotkey.com/).
 2.  Run `MacKey4Windows.ahk`.
-3.  **Basic Navigation**: Hold `CapsLock` and press:
-    *   `P` / `N`: Up / Down
-    *   `B` / `F`: Left / Right
-    *   `W` / `Q`: Word Right / Word Left
-    *   `V`: Page Down
-    *   (Mappings are fully customizable in Settings)
-4.  **Settings**: Right-click the **Retro Mario** tray icon -> `Settings`.
-    *   **General**: Adjust Hold Timeout, Mouse Speed, Acceleration, Max Speed, Interval.
-    *   **CapsLock Keys**: Customise the navigation layer.
-    *   **Global Keys**: Customise system-wide shortcuts.
-    *   **Excluded Apps**: Add programs where the script should be inactive.
-5.  **Pause**: Right-click tray icon -> `Pause` to temporarily disable all hotkeys.
-6.  **Export/Import**: Use the buttons in Settings to backup or restore configuration.
+3.  Right-click the **Retro Mario** tray icon for Settings, Pause, Reload, Exit.
 
 ## Configuration
 

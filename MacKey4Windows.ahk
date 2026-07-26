@@ -66,6 +66,11 @@ Actions["BackspaceWord"] := (*) => Send("^{Backspace}")
 Actions["PageUp"] := (*) => Send("{PgUp}")
 Actions["PageDown"] := (*) => Send("{PgDn}")
 
+; Emacs-style CapsLock layer Actions
+Actions["KillLine"] := (*) => Send("+{End}{Delete}")
+Actions["Backspace"] := (*) => Send("{Backspace}")
+Actions["TransposeChars"] := TransposeCharsAction
+
 ; File Paths
 global IniFilePath := A_ScriptDir "\settings.ini"
 
@@ -251,6 +256,17 @@ StartMouseMovement(dx, dy) {
             
         Sleep interval
     }
+}
+
+; Transpose the two characters around the cursor (macOS Ctrl+T / Emacs C-t)
+TransposeCharsAction(*) {
+    Send("+{Left}")
+    Sleep 30
+    Send("^x")
+    Sleep 30
+    Send("{Right}")
+    Sleep 30
+    Send("^v")
 }
 
 ; ------------------------------------------------------------------------------
